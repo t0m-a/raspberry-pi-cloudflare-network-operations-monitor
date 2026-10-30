@@ -1,0 +1,180 @@
+{
+    "last_updated": "2026-10-30 01:01:33 UTC",
+    "domains": {
+        "example.com": {
+            "status": "HEALTHY",
+            "bandwidth_gb": 0.0005,
+            "hit_volume": 195,
+            "cache_hit_ratio": 4.1,
+            "security_events": 0,
+            "errors_5xx": 2
+        },
+        "example.net": {
+            "status": "HEALTHY",
+            "bandwidth_gb": 0.0001,
+            "hit_volume": 56,
+            "cache_hit_ratio": 23.21,
+            "security_events": 0,
+            "errors_5xx": 0
+        }
+    },
+    "billing_period": {
+        "month_start": "2026-10-01",
+        "current_date_utc": "2026-10-30"
+    },
+    "workers_and_pages": {
+        "daily_requests": 44,
+        "daily_requests_limit": 100000,
+        "daily_requests_pct": 0.04,
+        "mtd_worker_requests": 3036,
+        "mtd_pages_requests": 0,
+        "mtd_subrequests": 2827,
+        "mtd_errors": 3,
+        "mtd_cpu_time_ms": 3716.3,
+        "mtd_assets_requests": 41357,
+        "mtd_build_minutes": 18.86,
+        "monthly_build_minutes_limit": 3000,
+        "monthly_build_minutes_pct": 0.63,
+        "estimated_billable_usd": 0.0,
+        "scripts": [
+            {
+                "name": "sample-worker",
+                "type": "Worker",
+                "requests_today": 44,
+                "requests_mtd": 2697,
+                "subrequests_mtd": 2691,
+                "errors_mtd": 0,
+                "cpu_time_ms_mtd": 1603.45
+            },
+            {
+                "name": "knowledge-base-worker",
+                "type": "Worker",
+                "requests_today": 0,
+                "requests_mtd": 339,
+                "subrequests_mtd": 136,
+                "errors_mtd": 3,
+                "cpu_time_ms_mtd": 2112.86
+            },
+            {
+                "name": "frontend-app-worker",
+                "type": "Worker",
+                "requests_today": 0,
+                "requests_mtd": 0,
+                "subrequests_mtd": 0,
+                "errors_mtd": 0,
+                "cpu_time_ms_mtd": 0.0
+            },
+            {
+                "name": "media-service-worker",
+                "type": "Worker",
+                "requests_today": 0,
+                "requests_mtd": 0,
+                "subrequests_mtd": 0,
+                "errors_mtd": 0,
+                "cpu_time_ms_mtd": 0.0
+            }
+        ],
+        "assets_hosts": [
+            {
+                "hostname": "example.com",
+                "requests_today": 8,
+                "requests_mtd": 28768
+            },
+            {
+                "hostname": "cdn.example.com",
+                "requests_today": 0,
+                "requests_mtd": 7601
+            },
+            {
+                "hostname": "example.net",
+                "requests_today": 58,
+                "requests_mtd": 4928
+            },
+            {
+                "hostname": "www.example.net",
+                "requests_today": 0,
+                "requests_mtd": 46
+            },
+            {
+                "hostname": "sample-worker.example.workers.dev",
+                "requests_today": 0,
+                "requests_mtd": 14
+            }
+        ]
+    },
+    "workers_ai": {
+        "daily_neurons": 0.0,
+        "daily_neurons_limit": 10000,
+        "daily_neurons_pct": 0.0,
+        "daily_requests": 0,
+        "mtd_neurons": 1758.14,
+        "mtd_billable_neurons": 0.0,
+        "mtd_requests": 152,
+        "mtd_input_tokens": 107092,
+        "mtd_output_tokens": 2602,
+        "mtd_inference_time_ms": 94451,
+        "estimated_billable_usd": 0.0,
+        "models": [
+            {
+                "model_id": "@cf/meta/llama-3.3-70b-instruct-fp8-fast",
+                "requests_mtd": 6,
+                "requests_today": 0,
+                "neurons_mtd": 1278.88,
+                "input_tokens_mtd": 27973,
+                "output_tokens_mtd": 2602,
+                "inference_time_ms_mtd": 64497
+            },
+            {
+                "model_id": "@cf/baai/bge-base-en-v1.5",
+                "requests_mtd": 146,
+                "requests_today": 0,
+                "neurons_mtd": 479.26,
+                "input_tokens_mtd": 79119,
+                "output_tokens_mtd": 0,
+                "inference_time_ms_mtd": 29954
+            }
+        ]
+    },
+    "d1_billing": {
+        "daily_rows_read": 0,
+        "daily_rows_read_limit": 5000000,
+        "daily_rows_read_pct": 0.0,
+        "daily_rows_written": 0,
+        "daily_rows_written_limit": 100000,
+        "daily_rows_written_pct": 0.0,
+        "mtd_rows_read": 1315084,
+        "mtd_rows_written": 76389,
+        "mtd_read_queries": 609,
+        "mtd_write_queries": 983,
+        "total_storage_mb": 51.98,
+        "account_storage_limit_mb": 5000.0,
+        "account_storage_pct": 1.04,
+        "estimated_billable_usd": 0.0
+    },
+    "d1_databases": [
+        {
+            "name": "knowledge-base-db",
+            "uuid": "00000000-0000-0000-0000-000000000001",
+            "file_size_mb": 51.95,
+            "capacity_pct": 10.4,
+            "rows_read": 1314863,
+            "rows_written": 76298,
+            "rows_read_today": 0,
+            "rows_written_today": 0,
+            "read_queries": 575,
+            "write_queries": 948
+        },
+        {
+            "name": "analytics-db",
+            "uuid": "00000000-0000-0000-0000-000000000002",
+            "file_size_mb": 0.04,
+            "capacity_pct": 0.0,
+            "rows_read": 221,
+            "rows_written": 91,
+            "rows_read_today": 0,
+            "rows_written_today": 0,
+            "read_queries": 34,
+            "write_queries": 35
+        }
+    ]
+}

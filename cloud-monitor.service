@@ -1,0 +1,23 @@
+[Unit]
+Description=Cloudflare Multi-Zone Analytics Monitoring Daemon
+After=network.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/local/bin
+ExecStart=/usr/bin/python3 /usr/local/bin/cloud_monitor_daemon.py
+Restart=always
+RestartSec=10
+
+Environment="CLOUDFLARE_API_TOKEN=your_cloudflare_api_token_here"
+Environment="CLOUDFLARE_ACCOUNT_ID=your_cloudflare_account_id_here"
+Environment="CF_ZONE_ID_1=your_first_zone_id_here"
+Environment="CF_ZONE_ID_2=your_second_zone_id_here"
+
+# Telegram Bot Context (Optional)
+Environment="TELEGRAM_BOT_TOKEN=your_telegram_bot_token_here"
+Environment="TELEGRAM_CHAT_ID=your_telegram_chat_id_here"
+
+[Install]
+WantedBy=multi-user.target
