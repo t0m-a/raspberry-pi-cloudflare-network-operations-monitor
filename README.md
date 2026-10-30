@@ -7,6 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
 
 A lightweight, 24/7 telemetry daemon and real-time mission-control dashboard engineered for Raspberry Pi and single-board computers (SBCs). It polls Cloudflare GraphQL and REST APIs to provide edge performance analytics, quota tracking, and billable usage monitoring across multiple zones, Workers, Workers AI, and D1 databases.
+
 **All the demo platforms currently deployed and running under my main domain are not publicly accessible. Please, email me if you would like a live demo. Thank you.**
 ---
 
