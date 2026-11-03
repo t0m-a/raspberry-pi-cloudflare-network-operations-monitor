@@ -8,7 +8,6 @@
 
 A lightweight, 24/7 telemetry daemon and real-time mission-control dashboard engineered for Raspberry Pi and single-board computers (SBCs). It polls Cloudflare GraphQL and REST APIs to provide edge performance analytics, quota tracking, and billable usage monitoring across multiple zones, Workers, Workers AI, and D1 databases.
 
-**All the demo platforms currently deployed and running under my main domain are not publicly accessible. Please, email me if you would like a live demo. Thank you.**
 ---
 
 ## 📌 Architecture & Data Flow
@@ -86,6 +85,8 @@ Visual health statuses automatically adapt based on consumption thresholds:
 - 🟢 **Healthy (< 60%)**: Safe consumption within free tier limits.
 - 🟡 **Warning (60% – 79%)**: Approaching daily/monthly quotas.
 - 🔴 **Critical (≥ 80%)**: Immediate attention required; risk of throttling or overage charges.
+
+![Pi Cloud Monitoring Dashboard](pi-cloud-monitoring.png)
 
 ---
 
