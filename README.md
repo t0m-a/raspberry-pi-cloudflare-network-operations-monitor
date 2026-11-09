@@ -1,6 +1,6 @@
 <div align="center">
 
-<img src="favicon.svg" alt="Raspberry Pi NOC Logo" width="92" height="92" />
+![Edge RAG Hub Banner](https://tsimon.me/edge-lab-logo.png)
 
 # 🍓 Edge & Local Network Operations Center (Raspberry Pi NOC)
 
