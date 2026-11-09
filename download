@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+
+# Sensitive local configurations
+.env
+*.local.service
+
+# Atomic swap & temp files
+*.tmp
+
+# Operating System files
+.DS_Store
+Thumbs.db
