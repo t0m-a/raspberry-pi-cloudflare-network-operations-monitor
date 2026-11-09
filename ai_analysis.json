@@ -1,0 +1,20 @@
+{
+  "last_analyzed_utc": "2026-11-09 04:39:20 UTC",
+  "metrics_sync_utc": "2026-11-09 04:39:09 UTC",
+  "model": "google/gemma-4-E2B-it (LiteRT-LM)",
+  "inference_duration_sec": 23.05,
+  "overall_status": "WARNING",
+  "reason_code": "NO_CHANGE_COOLDOWN",
+  "telegram_status": "Skipped (no alert trigger)",
+  "anomalies_count": 1,
+  "anomalies": [
+    {
+      "key": "cf_domain_5xx:tsimon.me",
+      "severity": "WARNING",
+      "category": "Cloudflare Edge",
+      "title": "Origin 5xx Errors on tsimon.me",
+      "detail": "4 HTTP 5xx errors in past 1h (393 total requests)"
+    }
+  ],
+  "analysis": "*   **Anomaly:** Warning detected: 2 HTTP 5xx errors on `tsimon.me` (Cloudflare Edge). Root cause requires investigation into origin server health.\n*   **Hardware/LAN:** Pi 5 is running stable (CPU 0.4%, Temp 46.3°C). Network connectivity is active on eth0.\n*   **Cloudflare Status:** `tsimon.me` shows 2 5xx errors in the last hour. Quotas appear healthy with low usage.\n*   **Action:** Immediately investigate the origin server hosting `tsimon.me` for the source of the 5xx errors."
+}

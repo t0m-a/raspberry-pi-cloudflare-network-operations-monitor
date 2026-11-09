@@ -2,19 +2,62 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Multi-Domain Network Operation Room</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Domain &amp; Local LAN Network Operations Center</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='%230f172a' stroke='%2338bdf8' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%231e3a5f' stroke-width='1.5' stroke-dasharray='4 3'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='%231e3a5f' stroke-width='1.2'/%3E%3Cline x1='32' y1='32' x2='17' y2='18' stroke='%2338bdf8' stroke-width='2' stroke-opacity='0.75'/%3E%3Cline x1='32' y1='32' x2='48' y2='19' stroke='%2338bdf8' stroke-width='2' stroke-opacity='0.75'/%3E%3Cline x1='32' y1='32' x2='47' y2='46' stroke='%2338bdf8' stroke-width='2' stroke-opacity='0.75'/%3E%3Cpolyline points='8,36 18,36 23,24 29,43 35,20 40,36 56,36' fill='none' stroke='%2322c55e' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='17' cy='18' r='3.5' fill='%2338bdf8'/%3E%3Ccircle cx='48' cy='19' r='3.5' fill='%2338bdf8'/%3E%3Ccircle cx='47' cy='46' r='3.5' fill='%2322c55e'/%3E%3Ccircle cx='35' cy='20' r='4' fill='%23f97316' stroke='%230f172a' stroke-width='1.5'/%3E%3C/svg%3E">
     <style>
+        html { scroll-behavior: smooth; }
         body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 2rem; }
-        h1 { margin-bottom: 0.4rem; }
-        h2 { color: #e2e8f0; border-bottom: 1px solid #1e293b; padding-bottom: 0.5rem; margin-top: 2.5rem; }
+        h1 { margin-bottom: 0.4rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
+        h2 { color: #e2e8f0; border-bottom: 1px solid #1e293b; padding-bottom: 0.5rem; margin-top: 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+        #sec-gemma-ai, #sec-local-system, #sec-net-interfaces, #sec-wifi-scanner, #sec-lan-devices, #sec-edge-domains, #sec-cloud-billing { scroll-margin-top: 4.75rem; }
+        .nav-pills {
+            position: sticky;
+            top: 0.75rem;
+            z-index: 1000;
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            margin-bottom: 1.75rem;
+            padding: 0.5rem 0.75rem;
+            width: fit-content;
+            max-width: 100%;
+            background: rgba(15, 23, 42, 0.55);
+            backdrop-filter: blur(10px) saturate(140%);
+            -webkit-backdrop-filter: blur(10px) saturate(140%);
+            border-radius: 999px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
+            transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .nav-pills:hover {
+            background: rgba(15, 23, 42, 0.82);
+            border-color: rgba(56, 189, 248, 0.38);
+        }
+        .nav-pill {
+            font-size: 0.8rem;
+            color: rgba(226, 232, 240, 0.9);
+            background: rgba(22, 34, 56, 0.6);
+            padding: 0.35rem 0.82rem;
+            border-radius: 999px;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+        }
+        .nav-pill:hover, .nav-pill.active {
+            background: rgba(56, 189, 248, 0.2);
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.75);
+        }
         .domain-section { margin-bottom: 2.25rem; background: #111c30; padding: 1.5rem; border-radius: 12px; border: 1px solid #1e293b; }
-        .domain-title { font-size: 1.4rem; color: #38bdf8; font-weight: bold; margin-top: 0; border-bottom: 2px solid #1e293b; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; }
+        .domain-title { font-size: 1.4rem; color: #38bdf8; font-weight: bold; margin-top: 0; border-bottom: 2px solid #1e293b; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
         .subtitle-badge { font-size: 0.8rem; font-weight: normal; color: #94a3b8; background: #1e293b; padding: 0.25rem 0.65rem; border-radius: 999px; border: 1px solid #334155; }
         .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.15rem; margin-top: 1rem; }
         .card { background: #1e293b; padding: 1.15rem; border-radius: 8px; border: 1px solid #334155; }
         .card h3 { margin: 0 0 0.6rem 0; font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; }
         .metric { font-size: 1.6rem; font-weight: bold; color: #f97316; }
-        .metric-sub { font-size: 0.8rem; color: #94a3b8; margin-top: 0.35rem; }
+        .metric-sub { font-size: 0.8rem; color: #94a3b8; margin-top: 0.35rem; line-height: 1.4; }
         .status-healthy { color: #22c55e; }
         .status-warn { color: #eab308; }
         .status-crit { color: #ef4444; }
@@ -23,28 +66,100 @@
         .bg-healthy { background: #22c55e; }
         .bg-warn { background: #eab308; }
         .bg-crit { background: #ef4444; }
+        .bg-info { background: #38bdf8; }
         .table-wrap { margin-top: 1.25rem; overflow-x: auto; }
-        table.breakdown-table { width: 100%; border-collapse: collapse; font-size: 0.88rem; }
-        table.breakdown-table th { text-align: left; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.75rem; letter-spacing: 0.04em; padding: 0.6rem 0.75rem; border-bottom: 1px solid #334155; background: #162238; }
-        table.breakdown-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #1e293b; color: #e2e8f0; }
+        .sub-header { font-size: 0.95rem; font-weight: 600; color: #cbd5e1; margin: 1.5rem 0 0.5rem 0; display: flex; justify-content: space-between; align-items: center; }
+        table.breakdown-table { width: 100%; border-collapse: collapse; font-size: 0.86rem; }
+        table.breakdown-table th { text-align: left; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.73rem; letter-spacing: 0.04em; padding: 0.6rem 0.75rem; border-bottom: 1px solid #334155; background: #162238; white-space: nowrap; }
+        table.breakdown-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #1e293b; color: #e2e8f0; vertical-align: middle; }
         table.breakdown-table tr:last-child td { border-bottom: none; }
-        .tag { display: inline-block; font-size: 0.72rem; padding: 0.12rem 0.45rem; border-radius: 4px; background: #0f172a; color: #38bdf8; border: 1px solid #1e3a5f; margin-left: 0.4rem; }
+        table.breakdown-table tr:hover td { background: rgba(30, 41, 59, 0.55); }
+        .tag { display: inline-block; font-size: 0.71rem; padding: 0.12rem 0.45rem; border-radius: 4px; background: #0f172a; color: #38bdf8; border: 1px solid #1e3a5f; margin-left: 0.4rem; white-space: nowrap; }
+        .tag-green { background: rgba(34, 197, 94, 0.12); color: #4ade80; border-color: rgba(34, 197, 94, 0.35); }
+        .tag-amber { background: rgba(234, 179, 8, 0.12); color: #facc15; border-color: rgba(234, 179, 8, 0.35); }
+        .tag-red { background: rgba(239, 68, 68, 0.12); color: #f87171; border-color: rgba(239, 68, 68, 0.35); }
+        .tag-purple { background: rgba(168, 85, 247, 0.14); color: #c084fc; border-color: rgba(168, 85, 247, 0.35); }
+        .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.83rem; }
+        .core-pills { display: flex; gap: 0.35rem; flex-wrap: wrap; margin-top: 0.45rem; }
+        .core-pill { font-size: 0.72rem; background: #0f172a; border: 1px solid #334155; border-radius: 4px; padding: 0.1rem 0.4rem; color: #cbd5e1; }
         .db-row { display: flex; justify-content: space-between; align-items: center; margin-top: 0.5rem; font-size: 0.9rem; border-bottom: 1px solid #334155; padding-bottom: 0.5rem; }
-        #system-meta { font-size: 0.95rem; color: #94a3b8; margin-bottom: 2rem; }
+        #system-meta { font-size: 0.95rem; color: #94a3b8; margin-bottom: 1rem; line-height: 1.6; }
+        .snooze-btn {
+            background: #0f172a;
+            color: #38bdf8;
+            border: 1px solid #1e3a5f;
+            border-radius: 4px;
+            padding: 0.18rem 0.5rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .snooze-btn:hover {
+            background: #0284c7;
+            color: #ffffff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+        }
+        .unsnooze-btn {
+            background: #0f172a;
+            color: #f87171;
+            border: 1px solid #7f1d1d;
+            border-radius: 4px;
+            padding: 0.18rem 0.5rem;
+            font-size: 0.72rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .unsnooze-btn:hover {
+            background: #dc2626;
+            color: #ffffff;
+            border-color: #f87171;
+            box-shadow: 0 0 8px rgba(248, 113, 113, 0.4);
+        }
     </style>
 </head>
 <body>
-    <h1>Edge Network Operations</h1>
+    <h1>
+        <span>Edge &amp; Local Network Operations Center</span>
+        <span id="host-badge" class="subtitle-badge">Node: Connecting...</span>
+    </h1>
     <div id="system-meta">
         System Sync: <span id="last-updated">Connecting...</span> |
         Main Monitor: <span id="daemon-health" class="status-healthy">ONLINE</span> |
+        Node Uptime: <span id="node-uptime">--</span> |
         Billing Cycle (UTC): <span id="billing-cycle">--</span>
     </div>
 
-    <!-- Active domain groups append dynamically inside this container -->
+    <div class="nav-pills">
+        <a class="nav-pill" href="#sec-gemma-ai">Gemma 4 AI Analyst</a>
+        <a class="nav-pill" href="#sec-local-system">Raspberry Pi System &amp; Storage</a>
+        <a class="nav-pill" href="#sec-net-interfaces">Local Network Interfaces</a>
+        <a class="nav-pill" href="#sec-wifi-scanner">Wi-Fi Spectrum Scanner</a>
+        <a class="nav-pill" href="#sec-lan-devices">LAN Devices &amp; Name Resolution</a>
+        <a class="nav-pill" href="#sec-edge-domains">Cloudflare Edge Domains</a>
+        <a class="nav-pill" href="#sec-cloud-billing">Workers, AI &amp; D1 Quotas</a>
+    </div>
+
+    <!-- 0. Gemma 4 LiteRT-LM Local AI NOC Analysis -->
+    <div id="sec-gemma-ai"></div>
+    <div id="gemma-ai-container"></div>
+
+    <!-- 1. Local Raspberry Pi System Telemetry & Network Interfaces -->
+    <div id="sec-local-system"></div>
+    <div id="local-system-container"></div>
+
+    <!-- 2. Local LAN Discovery & Wi-Fi Spectrum Scanning -->
+    <div id="sec-wifi-scanner"></div>
+    <div id="lan-network-container"></div>
+
+    <!-- 3. Active Cloudflare Edge Domain Groups -->
+    <h2 id="sec-edge-domains">Cloudflare Edge Domains Telemetry</h2>
     <div id="domains-container"></div>
 
-    <!-- Account Billing & Platform Usage Sections -->
+    <!-- 4. Account Billing & Platform Usage Sections -->
+    <h2 id="sec-cloud-billing">Cloudflare Account Billing &amp; Platform Quotas</h2>
     <div id="workers-pages-container"></div>
     <div id="workers-ai-container"></div>
 
@@ -64,8 +179,47 @@
             return 'bg-healthy';
         }
 
+        function getTempClass(tempC) {
+            if (tempC === null || tempC === undefined) return '';
+            if (tempC >= 80) return 'status-crit';
+            if (tempC >= 65) return 'status-warn';
+            return 'status-healthy';
+        }
+
+        function getTempBarClass(tempC) {
+            if (tempC === null || tempC === undefined) return 'bg-info';
+            if (tempC >= 80) return 'bg-crit';
+            if (tempC >= 65) return 'bg-warn';
+            return 'bg-healthy';
+        }
+
         function clampPct(pct) {
             return Math.min(100, Math.max(0, Number(pct) || 0));
+        }
+
+        function formatBytes(bytes) {
+            const b = Number(bytes) || 0;
+            if (b >= 1024 ** 3) return (b / (1024 ** 3)).toFixed(2) + ' GB';
+            if (b >= 1024 ** 2) return (b / (1024 ** 2)).toFixed(2) + ' MB';
+            if (b >= 1024) return (b / 1024).toFixed(1) + ' KB';
+            return b + ' B';
+        }
+
+        function formatRateKbps(kbps) {
+            const k = Number(kbps) || 0;
+            if (k >= 1000) return (k / 1000).toFixed(2) + ' Mbps';
+            return k.toFixed(1) + ' kbps';
+        }
+
+        function formatSyncTimestamp(utcStr) {
+            if (!utcStr) return 'Unknown';
+            const m = String(utcStr).match(/^(\d{4})-(\d{2})-(\d{2})\s+(\d{2}):(\d{2}):(\d{2})/);
+            if (!m) return utcStr;
+            const utcMs = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+            const gmt4 = new Date(utcMs - 4 * 3600 * 1000);
+            const pad = (n) => String(n).padStart(2, '0');
+            const gmt4Time = `${pad(gmt4.getUTCHours())}:${pad(gmt4.getUTCMinutes())}:${pad(gmt4.getUTCSeconds())} GMT-4`;
+            return `${utcStr} (${gmt4Time})`;
         }
 
         async function updateDashboard() {
@@ -76,7 +230,7 @@
                 }
                 const data = await response.json();
 
-                document.getElementById('last-updated').innerText = data.last_updated || 'Unknown';
+                document.getElementById('last-updated').innerText = formatSyncTimestamp(data.last_updated);
                 document.getElementById('daemon-health').innerText = "ONLINE";
                 document.getElementById('daemon-health').className = "status-healthy";
 
@@ -84,7 +238,469 @@
                 document.getElementById('billing-cycle').innerText =
                     bp.month_start ? `${bp.month_start} → ${bp.current_date_utc}` : 'Current Month';
 
+                // =========================================================================
+                // 0. Render Gemma 4 LiteRT-LM Local AI NOC Analysis (if available)
+                // =========================================================================
+                try {
+                    const aiResp = await fetch('ai_analysis.json?cache_bust=' + Date.now());
+                    if (aiResp.ok) {
+                        const aiData = await aiResp.json();
+                        const aiContainer = document.getElementById('gemma-ai-container');
+                        const aiStatus = aiData.overall_status || 'HEALTHY';
+                        const aiStatusClass = aiStatus === 'CRITICAL' ? 'status-crit' : (aiStatus === 'WARNING' ? 'status-warn' : 'status-healthy');
+                        const aiAnomalies = aiData.anomalies || [];
+
+                        const escapeHtml = (s) => String(s || '')
+                            .replace(/&/g, '&amp;')
+                            .replace(/</g, '&lt;')
+                            .replace(/>/g, '&gt;');
+
+                        const formatAiMarkdown = (raw) => escapeHtml(raw)
+                            .replace(/\*\*([^*]+)\*\*/g, '<strong style="color:#f8fafc;">$1</strong>')
+                            .replace(/`([^`]+)`/g, '<code class="mono" style="background:#0f172a; padding:0.1rem 0.35rem; border-radius:4px; color:#38bdf8; border:1px solid #1e3a5f;">$1</code>');
+
+                        let anomaliesHtml = '';
+                        if (aiAnomalies.length > 0) {
+                            anomaliesHtml = '<div style="margin-top:0.85rem; display:flex; flex-direction:column; gap:0.45rem;">' +
+                                aiAnomalies.map(a => {
+                                    const tagCls = a.severity === 'CRITICAL' ? 'tag-red' : 'tag-amber';
+                                    return `<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; background:#0b1329; padding:0.45rem 0.65rem; border-radius:6px; border:1px solid #1e293b;">
+                                        <div>
+                                            <span class="tag ${tagCls}" style="margin-left:0">${escapeHtml(a.severity)}</span>
+                                            <strong>${escapeHtml(a.title)}</strong>
+                                            <span style="color:#94a3b8">— ${escapeHtml(a.detail)}</span>
+                                        </div>
+                                        <div style="display:flex; gap:0.25rem; align-items:center;">
+                                            <span style="font-size:0.75rem; color:#64748b; margin-right:0.2rem;">Snooze:</span>
+                                            <button class="snooze-btn" onclick="snoozeAssessment('${escapeHtml(a.key)}', '24h')" title="Snooze for 24 hours">24h</button>
+                                            <button class="snooze-btn" onclick="snoozeAssessment('${escapeHtml(a.key)}', '72h')" title="Snooze for 72 hours">72h</button>
+                                            <button class="snooze-btn" onclick="snoozeAssessment('${escapeHtml(a.key)}', '7d')" title="Snooze for 7 days">7d</button>
+                                        </div>
+                                    </div>`;
+                                }).join('') +
+                                '</div>';
+                        }
+
+                        const aiSnoozed = aiData.snoozed_anomalies || [];
+                        let snoozedHtml = '';
+                        if (aiSnoozed.length > 0) {
+                            snoozedHtml = '<div style="margin-top:0.85rem; background:#0b1329; border:1px dashed #334155; border-radius:6px; padding:0.6rem 0.75rem;">' +
+                                `<div style="font-size:0.8rem; font-weight:600; color:#94a3b8; margin-bottom:0.45rem; display:flex; justify-content:space-between; align-items:center;">` +
+                                `<span>💤 Snoozed Assessments (${aiSnoozed.length}) — Alerts Muted</span>` +
+                                `<button class="unsnooze-btn" onclick="unsnoozeAssessment('all')" style="font-size:0.7rem; padding:0.1rem 0.4rem;">Unsnooze All</button>` +
+                                `</div>` +
+                                '<div style="display:flex; flex-direction:column; gap:0.35rem;">' +
+                                aiSnoozed.map(s => `
+                                    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; font-size:0.85rem;">
+                                        <div>
+                                            <span class="tag" style="background:#1e293b; color:#38bdf8; border:1px solid #0284c7; margin-left:0;">💤 ${escapeHtml(s.duration_str || '24h')}</span>
+                                            <strong>${escapeHtml(s.title)}</strong>
+                                            <span style="color:#64748b;">— ${escapeHtml(s.detail || '')}</span>
+                                            <span style="color:#94a3b8; font-size:0.75rem;">(${escapeHtml(s.remaining_human || '')} left • expires ${escapeHtml(s.snoozed_until_utc || '')})</span>
+                                        </div>
+                                        <button class="unsnooze-btn" onclick="unsnoozeAssessment('${escapeHtml(s.key)}')" title="Reactivate this assessment">Unsnooze</button>
+                                    </div>
+                                `).join('') +
+                                '</div></div>';
+                        }
+
+                        aiContainer.innerHTML = `
+                            <div class="domain-section" style="border-color:#38bdf8;">
+                                <div class="domain-title">
+                                    <span>🤖 Gemma 4 LiteRT-LM Autonomous NOC Analyst</span>
+                                    <span class="subtitle-badge">${escapeHtml(aiData.model || 'google/gemma-4-E2B-it')} | Last Check: ${escapeHtml(aiData.last_analyzed_utc || '--')} (${aiData.inference_duration_sec ?? 0}s)</span>
+                                </div>
+                                <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                                    <div class="card">
+                                        <h3>AI Monitor Verdict</h3>
+                                        <div class="metric ${aiStatusClass}">${escapeHtml(aiStatus)}</div>
+                                        <div class="metric-sub">${aiData.anomalies_count ?? 0} active finding(s)${aiSnoozed.length ? ' • ' + aiSnoozed.length + ' snoozed' : ''} • Trigger: <strong>${escapeHtml(aiData.reason_code || 'SCHEDULED')}</strong></div>
+                                    </div>
+                                    <div class="card">
+                                        <h3>Telegram Bot &amp; Alerting</h3>
+                                        <div class="metric" style="font-size:1.1rem; color:#38bdf8;">${escapeHtml(aiData.telegram_status || 'Idle')}</div>
+                                        <div class="metric-sub">Bot: <strong>@minkalab_alert_bot</strong> • Smart 4h cooldown + Daily 08:00 digest + Interactive Chat (<code>/status</code>, <code>/snooze</code>, <code>/pi</code>, <code>/lan</code>, <code>/cf</code>, <code>/ask</code>)</div>
+                                    </div>
+                                    <div class="card">
+                                        <h3>Schedule &amp; Engine</h3>
+                                        <div class="metric" style="font-size:1.1rem; color:#c084fc;">Every 15m (Systemd)</div>
+                                        <div class="metric-sub">Subprocess-isolated XNNPACK 4-thread CPU engine (0 MB idle RAM)</div>
+                                    </div>
+                                </div>
+                                ${anomaliesHtml}
+                                ${snoozedHtml}
+                                <div class="card" style="margin-top:1rem; background:#0f172a; border-color:#1e3a5f;">
+                                    <h3>Gemma 4 Assessment</h3>
+                                    <div style="white-space:pre-wrap; font-size:0.9rem; line-height:1.55; color:#e2e8f0;">${formatAiMarkdown(aiData.analysis || 'Waiting for next Gemma 4 evaluation cycle...')}</div>
+                                </div>
+                            </div>
+                        `;
+                    }
+                } catch (e) {
+                    // Ignore if ai_analysis.json is not yet generated
+                }
+
+                // =========================================================================
+                // A. Render Local Raspberry Pi System Telemetry & Network Interfaces
+                // =========================================================================
+                const sys = data.local_system || {};
+                const host = sys.host || {};
+                const load = sys.load || {};
+                const cpu = sys.cpu || {};
+                const mem = sys.memory || {};
+                const swap = sys.swap || {};
+                const filesystems = sys.filesystems || [];
+                const nics = sys.network_interfaces || [];
+
+                if (host.hostname) {
+                    document.getElementById('host-badge').innerText =
+                        `${host.hostname} • ${host.hardware_model || host.os || 'Linux Node'}`;
+                    document.getElementById('node-uptime').innerText = host.uptime_human || '--';
+                }
+
+                const sysContainer = document.getElementById('local-system-container');
+                const loadPct = load.load_pct ?? 0;
+                const cpuPct = cpu.usage_pct ?? 0;
+                const tempC = cpu.temperature_c;
+                const tempPct = tempC !== null && tempC !== undefined ? clampPct((tempC / 85.0) * 100) : 0;
+                const memPct = mem.usage_pct ?? 0;
+                const swapPct = swap.usage_pct ?? 0;
+
+                const perCoreHtml = (cpu.per_core_pct || [])
+                    .map((p, idx) => `<span class="core-pill">C${idx}: <strong class="${getQuotaClass(p)}">${p}%</strong></span>`)
+                    .join('');
+
+                let fsRowsHtml = '';
+                filesystems.forEach(fs => {
+                    const fsPct = fs.usage_pct ?? 0;
+                    fsRowsHtml += `
+                        <tr>
+                            <td class="mono"><strong>${fs.mountpoint}</strong></td>
+                            <td class="mono" style="color:#94a3b8">${fs.device}</td>
+                            <td><span class="tag">${fs.fstype}</span></td>
+                            <td>${fs.used_gb} GB / ${fs.total_gb} GB</td>
+                            <td>${fs.free_gb} GB</td>
+                            <td style="min-width:170px;">
+                                <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                                    <span class="${getQuotaClass(fsPct)}"><strong>${fsPct}%</strong></span>
+                                    <span style="color:#94a3b8">${fs.free_gb} GB free</span>
+                                </div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(fsPct)}" style="width:${clampPct(fsPct)}%"></div></div>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                let nicRowsHtml = '';
+                nics.forEach(nic => {
+                    const isUp = nic.operstate === 'UP';
+                    const stateTag = isUp
+                        ? '<span class="tag tag-green" style="margin-left:0">UP</span>'
+                        : '<span class="tag tag-red" style="margin-left:0">DOWN</span>';
+                    const ipv4Str = (nic.ipv4 || []).join(', ') || '-';
+                    const ipv6List = nic.ipv6 || [];
+                    const ipv6Str = ipv6List.length > 0 ? `<div style="font-size:0.75rem; color:#94a3b8; margin-top:0.2rem;">IPv6: ${ipv6List[0]}</div>` : '';
+                    const wifiExtra = nic.wifi_ssid
+                        ? `<div style="font-size:0.75rem; color:#38bdf8; margin-top:0.2rem;">SSID: <strong>${nic.wifi_ssid}</strong> (${nic.wifi_signal_dbm ?? ''} dBm / ${nic.wifi_signal_pct ?? ''}%)</div>`
+                        : '';
+                    const gwExtra = (nic.gateways || []).length > 0
+                        ? `<div style="font-size:0.74rem; color:#94a3b8;">GW: ${nic.gateways.join(', ')}</div>`
+                        : '';
+                    const errDrops = (nic.rx_errors || 0) + (nic.tx_errors || 0) + (nic.rx_dropped || 0) + (nic.tx_dropped || 0);
+                    const errClass = (nic.rx_errors || 0) + (nic.tx_errors || 0) > 0 ? 'status-crit' : (errDrops > 0 ? 'status-warn' : 'status-healthy');
+
+                    nicRowsHtml += `
+                        <tr>
+                            <td>
+                                <strong>${nic.name}</strong>
+                                <span class="tag">${nic.type || 'NIC'}</span>
+                            </td>
+                            <td>${stateTag}</td>
+                            <td class="mono">
+                                <div>${ipv4Str}</div>
+                                ${gwExtra}
+                                ${ipv6Str}
+                                ${wifiExtra}
+                            </td>
+                            <td>
+                                <div class="mono">${nic.mac_address || '-'}</div>
+                                <div style="font-size:0.75rem; color:#94a3b8;">${nic.vendor || 'Unknown'}</div>
+                            </td>
+                            <td>${nic.speed_mbps ? nic.speed_mbps + ' Mbps' : '-'} <span style="color:#94a3b8; font-size:0.75rem;">(MTU ${nic.mtu || 1500})</span></td>
+                            <td>
+                                <div style="color:#38bdf8;">↓ ${formatRateKbps(nic.rx_rate_kbps)}</div>
+                                <div style="color:#f97316;">↑ ${formatRateKbps(nic.tx_rate_kbps)}</div>
+                            </td>
+                            <td>
+                                <div>↓ ${formatBytes(nic.rx_bytes)} <span style="color:#94a3b8; font-size:0.75rem;">(${(nic.rx_packets ?? 0).toLocaleString()} pkts)</span></div>
+                                <div>↑ ${formatBytes(nic.tx_bytes)} <span style="color:#94a3b8; font-size:0.75rem;">(${(nic.tx_packets ?? 0).toLocaleString()} pkts)</span></div>
+                            </td>
+                            <td class="${errClass}">
+                                ${nic.rx_errors ?? 0}/${nic.tx_errors ?? 0} err<br>
+                                <span style="font-size:0.75rem; color:#94a3b8;">${nic.rx_dropped ?? 0}/${nic.tx_dropped ?? 0} drop</span>
+                            </td>
+                        </tr>
+                    `;
+                });
+
+                sysContainer.innerHTML = `
+                    <div class="domain-section">
+                        <div class="domain-title">
+                            <span>Local NOC Host Telemetry (${host.hostname || 'rpi'})</span>
+                            <span class="subtitle-badge">${host.os || 'Raspberry Pi Linux'} | Processes: ${host.running_processes ?? 1} run / ${host.process_count ?? 0} total</span>
+                        </div>
+                        <div class="grid">
+                            <div class="card">
+                                <h3>System Load (1m / 5m / 15m)</h3>
+                                <div class="metric ${getQuotaClass(loadPct)}">${load.load_1m ?? 0} <span style="font-size:1.05rem; color:#94a3b8; font-weight:normal;">/ ${load.load_5m ?? 0} / ${load.load_15m ?? 0}</span></div>
+                                <div class="metric-sub">${loadPct}% normalized capacity across ${load.cores ?? 4} cores</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(loadPct)}" style="width:${clampPct(loadPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>CPU Usage &amp; Clocks</h3>
+                                <div class="metric ${getQuotaClass(cpuPct)}">${cpuPct}%</div>
+                                <div class="metric-sub">${cpu.model || 'ARM SoC'} @ <strong>${cpu.freq_mhz ?? 0} MHz</strong> ${cpu.governor ? `(${cpu.governor})` : ''}</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(cpuPct)}" style="width:${clampPct(cpuPct)}%"></div></div>
+                                ${perCoreHtml ? `<div class="core-pills">${perCoreHtml}</div>` : ''}
+                            </div>
+                            <div class="card">
+                                <h3>CPU &amp; SoC Thermal</h3>
+                                <div class="metric ${getTempClass(tempC)}">${tempC !== null && tempC !== undefined ? tempC + ' °C' : 'N/A'}</div>
+                                <div class="metric-sub">
+                                    Sensor: ${cpu.temp_sensor || 'thermal_zone0'}
+                                    ${cpu.rp1_temp_c ? ` | RP1: <strong>${cpu.rp1_temp_c} °C</strong>` : ''}
+                                    ${cpu.fan_rpm !== null && cpu.fan_rpm !== undefined ? ` | Fan: <strong>${cpu.fan_rpm} RPM</strong>` : ''}
+                                    <br>Power/Throttle: <span class="${(cpu.throttled_status || '').startsWith('OK') ? 'status-healthy' : 'status-warn'}">${cpu.throttled_status || 'OK'}</span>
+                                </div>
+                                <div class="progress-track"><div class="progress-bar ${getTempBarClass(tempC)}" style="width:${tempPct}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>RAM Memory Usage</h3>
+                                <div class="metric ${getQuotaClass(memPct)}">${memPct}% <span style="font-size:1rem; color:#e2e8f0; font-weight:normal;">(${(mem.used_mb ?? 0).toLocaleString()} / ${(mem.total_mb ?? 0).toLocaleString()} MB)</span></div>
+                                <div class="metric-sub">Available: <strong>${(mem.available_mb ?? 0).toLocaleString()} MB</strong> | Buffers/Cache: ${(mem.cached_buffers_mb ?? 0).toLocaleString()} MB</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(memPct)}" style="width:${clampPct(memPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Swap Space Usage</h3>
+                                <div class="metric ${getQuotaClass(swapPct)}">${swapPct}% <span style="font-size:1rem; color:#e2e8f0; font-weight:normal;">(${(swap.used_mb ?? 0).toLocaleString()} / ${(swap.total_mb ?? 0).toLocaleString()} MB)</span></div>
+                                <div class="metric-sub">Free Swap: <strong>${(swap.free_mb ?? 0).toLocaleString()} MB</strong></div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(swapPct)}" style="width:${clampPct(swapPct)}%"></div></div>
+                            </div>
+                        </div>
+
+                        <div class="sub-header">
+                            <span>Mounted File Systems &amp; Block Storage</span>
+                            <span style="font-size:0.78rem; color:#94a3b8;">${filesystems.length} active mount(s)</span>
+                        </div>
+                        <div class="table-wrap" style="margin-top:0.4rem;">
+                            <table class="breakdown-table">
+                                <thead>
+                                    <tr>
+                                        <th>Mountpoint</th>
+                                        <th>Block Device</th>
+                                        <th>FS Type</th>
+                                        <th>Used / Total Capacity</th>
+                                        <th>Free Space</th>
+                                        <th>Utilization</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${fsRowsHtml || '<tr><td colspan="6" style="color:#94a3b8">No filesystems reported.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="sec-net-interfaces" class="sub-header" style="margin-top:1.75rem;">
+                            <span>Local Network Interfaces Monitoring</span>
+                            <span style="font-size:0.78rem; color:#94a3b8;">${nics.length} interface(s) monitored</span>
+                        </div>
+                        <div class="table-wrap" style="margin-top:0.4rem;">
+                            <table class="breakdown-table">
+                                <thead>
+                                    <tr>
+                                        <th>Interface</th>
+                                        <th>State</th>
+                                        <th>IPv4 / IPv6 &amp; Gateway</th>
+                                        <th>Hardware MAC &amp; Vendor</th>
+                                        <th>Link Speed</th>
+                                        <th>Throughput Rate</th>
+                                        <th>Cumulative Traffic (RX / TX)</th>
+                                        <th>Errors / Drops</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${nicRowsHtml || '<tr><td colspan="8" style="color:#94a3b8">No network interfaces detected.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                // =========================================================================
+                // B. Render LAN Device Discovery, Wi-Fi Spectrum & Name Resolutions
+                // =========================================================================
+                const lan = data.lan_network || {};
+                const lanSum = lan.summary || {};
+                const wifiList = lan.wifi_networks || [];
+                const lanDevices = lan.lan_devices || [];
+                const lanContainer = document.getElementById('lan-network-container');
+
+                let wifiRowsHtml = '';
+                wifiList.forEach(w => {
+                    const sigPct = w.signal_pct ?? 0;
+                    const sigBarClass = sigPct >= 60 ? 'bg-healthy' : (sigPct >= 35 ? 'bg-warn' : 'bg-crit');
+                    const sigTextClass = sigPct >= 60 ? 'status-healthy' : (sigPct >= 35 ? 'status-warn' : 'status-crit');
+                    const connBadge = w.connected
+                        ? '<span class="tag tag-green" style="margin-left:0">CONNECTED</span>'
+                        : '<span class="tag" style="margin-left:0; color:#94a3b8;">VISIBLE</span>';
+
+                    wifiRowsHtml += `
+                        <tr>
+                            <td>${connBadge}</td>
+                            <td><strong>${w.ssid}</strong> <span class="tag">${w.interface || 'wlan0'}</span></td>
+                            <td class="mono">${w.bssid}</td>
+                            <td>${w.vendor || 'Unknown'}</td>
+                            <td><strong>${w.band || '-'}</strong> • Ch ${w.channel || '-'} <span style="color:#94a3b8; font-size:0.76rem;">(${w.frequency_mhz ? w.frequency_mhz + ' MHz' : ''})</span></td>
+                            <td><span class="tag tag-purple" style="margin-left:0">${w.radio_type || '802.11'}</span></td>
+                            <td style="min-width:160px;">
+                                <div style="display:flex; justify-content:space-between; font-size:0.8rem;">
+                                    <span class="${sigTextClass}"><strong>${w.signal_dbm ?? ''} dBm</strong></span>
+                                    <span style="color:#94a3b8">${sigPct}%</span>
+                                </div>
+                                <div class="progress-track"><div class="progress-bar ${sigBarClass}" style="width:${clampPct(sigPct)}%"></div></div>
+                            </td>
+                            <td><span class="tag tag-amber" style="margin-left:0">${w.security || 'Open'}</span></td>
+                        </tr>
+                    `;
+                });
+
+                let lanRowsHtml = '';
+                lanDevices.forEach(d => {
+                    let roleBadge = '<span class="tag" style="color:#94a3b8">PEER</span>';
+                    if ((d.role || '').startsWith('THIS NODE')) {
+                        roleBadge = `<span class="tag tag-purple">${d.role}</span>`;
+                    } else if (d.role === 'GATEWAY') {
+                        roleBadge = '<span class="tag tag-amber">GATEWAY</span>';
+                    }
+
+                    const statusBadge = d.status === 'ONLINE'
+                        ? '<span class="tag tag-green" style="margin-left:0">ONLINE</span>'
+                        : `<span class="tag" style="margin-left:0">${d.status || 'REACHABLE'}</span>`;
+                    const rttStr = d.rtt_ms !== null && d.rtt_ms !== undefined
+                        ? `<span class="mono" style="font-size:0.78rem; color:#94a3b8; margin-left:0.35rem;">${d.rtt_ms} ms</span>`
+                        : '';
+                    const nbDisplay = d.netbios_name && d.netbios_name !== '-'
+                        ? `<strong>${d.netbios_name}</strong>${d.netbios_group ? `<span class="tag">${d.netbios_group}</span>` : ''}`
+                        : '<span style="color:#64748b">-</span>';
+                    const dnsDisplay = d.dns_name && d.dns_name !== '-'
+                        ? `<span class="mono">${d.dns_name}</span>`
+                        : '<span style="color:#64748b">-</span>';
+                    const mdnsDisplay = d.mdns_name && d.mdns_name !== '-'
+                        ? `<span class="mono" style="color:#38bdf8">${d.mdns_name}</span>`
+                        : '<span style="color:#64748b">-</span>';
+                    const hostDisplay = d.hostname && d.hostname !== '-'
+                        ? `<strong style="color:#f8fafc">${d.hostname}</strong>`
+                        : '<span style="color:#64748b">Unresolved</span>';
+
+                    lanRowsHtml += `
+                        <tr>
+                            <td class="mono">
+                                <strong>${d.ip}</strong>
+                                ${roleBadge}
+                            </td>
+                            <td>${statusBadge}${rttStr}</td>
+                            <td class="mono">${d.mac}</td>
+                            <td>${d.vendor || 'Unknown Vendor'}</td>
+                            <td>${hostDisplay}</td>
+                            <td>${dnsDisplay}</td>
+                            <td>${nbDisplay}</td>
+                            <td>${mdnsDisplay}</td>
+                        </tr>
+                    `;
+                });
+
+                lanContainer.innerHTML = `
+                    <div class="domain-section">
+                        <div class="domain-title">
+                            <span>Local Area Network (LAN) &amp; Wireless RF Operations</span>
+                            <span class="subtitle-badge">Subnet: ${lanSum.subnet || '192.168.1.0/24'} | Scan Time: ${lanSum.scan_duration_ms ?? 0} ms</span>
+                        </div>
+                        <div class="grid">
+                            <div class="card">
+                                <h3>NOC Primary LAN IP</h3>
+                                <div class="metric" style="color:#38bdf8">${lanSum.local_ip || '--'}</div>
+                                <div class="metric-sub">Subnet: <strong>${lanSum.subnet || '--'}</strong></div>
+                            </div>
+                            <div class="card">
+                                <h3>Default Gateway &amp; DNS</h3>
+                                <div class="metric">${lanSum.gateway_ip || '--'}</div>
+                                <div class="metric-sub">DNS Resolvers: ${(lanSum.dns_servers || []).join(', ') || '--'}</div>
+                            </div>
+                            <div class="card">
+                                <h3>Active LAN Devices</h3>
+                                <div class="metric status-healthy">${lanSum.active_devices_count ?? lanDevices.length}</div>
+                                <div class="metric-sub">ARP + UDP/TCP + Avahi/Samba/DNS sweep</div>
+                            </div>
+                            <div class="card">
+                                <h3>Visible Wi-Fi Networks</h3>
+                                <div class="metric">${lanSum.wifi_networks_count ?? wifiList.length}</div>
+                                <div class="metric-sub">2.4 GHz &amp; 5 GHz 802.11 BSSIDs in range</div>
+                            </div>
+                        </div>
+
+                        <div class="sub-header" style="margin-top:1.5rem;">
+                            <span>Wi-Fi RF Spectrum Scanner (Nearby Access Points)</span>
+                            <span style="font-size:0.78rem; color:#94a3b8;">${wifiList.length} BSSID(s) detected</span>
+                        </div>
+                        <div class="table-wrap" style="margin-top:0.4rem;">
+                            <table class="breakdown-table">
+                                <thead>
+                                    <tr>
+                                        <th>Status</th>
+                                        <th>SSID</th>
+                                        <th>BSSID (AP MAC)</th>
+                                        <th>AP Hardware Vendor (OUI)</th>
+                                        <th>Band &amp; Channel</th>
+                                        <th>802.11 Radio</th>
+                                        <th>Signal Level</th>
+                                        <th>Security</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${wifiRowsHtml || '<tr><td colspan="8" style="color:#94a3b8">No Wi-Fi networks found in latest scan.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+
+                        <div id="sec-lan-devices" class="sub-header" style="margin-top:1.75rem;">
+                            <span>LAN Devices Inventory &amp; Multi-Protocol Name Resolution</span>
+                            <span style="font-size:0.78rem; color:#94a3b8;">${lanDevices.length} active host(s) on ${lanSum.subnet || 'LAN'}</span>
+                        </div>
+                        <div class="table-wrap" style="margin-top:0.4rem;">
+                            <table class="breakdown-table">
+                                <thead>
+                                    <tr>
+                                        <th>IP Address &amp; Role</th>
+                                        <th>State &amp; RTT</th>
+                                        <th>Hardware MAC</th>
+                                        <th>Hardware Vendor (OUI)</th>
+                                        <th>Primary Hostname</th>
+                                        <th>DNS Name (PTR)</th>
+                                        <th>NetBIOS Name</th>
+                                        <th>mDNS / Avahi Name</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${lanRowsHtml || '<tr><td colspan="8" style="color:#94a3b8">No LAN devices discovered.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                // =========================================================================
                 // 1. Render Dynamic Domain Section Blocks
+                // =========================================================================
                 const domainsContainer = document.getElementById('domains-container');
                 domainsContainer.innerHTML = '';
 
@@ -135,7 +751,9 @@
                     `;
                 }
 
+                // =========================================================================
                 // 2. Render Workers & Pages Billing & Usage
+                // =========================================================================
                 const wp = data.workers_and_pages || {};
                 const wpContainer = document.getElementById('workers-pages-container');
                 const wpDailyPct = wp.daily_requests_pct ?? 0;
@@ -238,7 +856,9 @@
                     </div>
                 `;
 
+                // =========================================================================
                 // 3. Render Workers AI Billing & Usage
+                // =========================================================================
                 const ai = data.workers_ai || {};
                 const aiContainer = document.getElementById('workers-ai-container');
                 const aiDailyPct = ai.daily_neurons_pct ?? 0;
@@ -314,7 +934,9 @@
                     </div>
                 `;
 
+                // =========================================================================
                 // 4. Render Shared Global Account D1 Billing & Storage Limits
+                // =========================================================================
                 const d1Container = document.getElementById('d1-container');
                 const d1b = data.d1_billing || {};
                 const dbs = data.d1_databases || [];
@@ -405,8 +1027,71 @@
             }
         }
 
+        async function snoozeAssessment(key, duration) {
+            try {
+                const resp = await fetch('/api/snooze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, duration }),
+                });
+                const data = await resp.json().catch(() => ({}));
+                if (resp.ok && data.ok) {
+                    await updateDashboard();
+                } else {
+                    alert('Snooze failed: ' + (data.error || resp.statusText));
+                }
+            } catch (e) {
+                alert('Could not reach Snooze API (/api/snooze): ' + e.message);
+            }
+        }
+
+        async function unsnoozeAssessment(key) {
+            try {
+                const resp = await fetch('/api/unsnooze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key }),
+                });
+                const data = await resp.json().catch(() => ({}));
+                if (resp.ok && data.ok) {
+                    await updateDashboard();
+                } else {
+                    alert('Unsnooze failed: ' + (data.error || resp.statusText));
+                }
+            } catch (e) {
+                alert('Could not reach Unsnooze API (/api/unsnooze): ' + e.message);
+            }
+        }
+
+        function updateActiveNavPill() {
+            const sectionIds = [
+                'sec-gemma-ai',
+                'sec-local-system',
+                'sec-net-interfaces',
+                'sec-wifi-scanner',
+                'sec-lan-devices',
+                'sec-edge-domains',
+                'sec-cloud-billing'
+            ];
+            let currentId = sectionIds[0];
+            const threshold = 140;
+            for (const id of sectionIds) {
+                const el = document.getElementById(id);
+                if (el) {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top <= threshold) {
+                        currentId = id;
+                    }
+                }
+            }
+            document.querySelectorAll('.nav-pills .nav-pill').forEach(pill => {
+                pill.classList.toggle('active', pill.getAttribute('href') === '#' + currentId);
+            });
+        }
+
+        window.addEventListener('scroll', updateActiveNavPill, { passive: true });
         setInterval(updateDashboard, 5000);
-        updateDashboard();
+        updateDashboard().then(updateActiveNavPill);
     </script>
 </body>
 </html>

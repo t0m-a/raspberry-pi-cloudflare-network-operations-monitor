@@ -1,0 +1,27 @@
+[Unit]
+Description=Gemma 4 LiteRT-LM NOC Telemetry Analyzer & Interactive Telegram Bot
+After=network-online.target cloud-monitor.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/usr/local/bin
+ExecStart=/root/.venv/bin/python /usr/local/bin/gemma_noc_monitor.py --daemon --interval 900
+Restart=always
+RestartSec=10
+Nice=5
+
+# Inherits CLOUDFLARE_* and TELEGRAM_* credentials from cloud-monitor.service automatically,
+# and can also be overridden here:
+Environment="METRICS_OUTPUT_PATH=/var/www/html/metrics.json"
+Environment="AI_ANALYSIS_OUTPUT_PATH=/var/www/html/ai_analysis.json"
+Environment="DASHBOARD_PUBLIC_URL=https://pi.tsimon.me/"
+Environment="GEMMA_NOC_STATE_PATH=/var/lib/gemma-noc-monitor/state.json"
+Environment="GEMMA_MODEL_PATH=/root/.litert-lm/cache/huggingface/litert-community/gemma-4-E2B-it-litert-lm/gemma-4-E2B-it.litertlm"
+Environment="GEMMA_ALERT_COOLDOWN_SEC=14400"
+Environment="GEMMA_DAILY_DIGEST_HOUR=8"
+Environment="GEMMA_MONITOR_INTERVAL_SEC=900"
+
+[Install]
+WantedBy=multi-user.target
