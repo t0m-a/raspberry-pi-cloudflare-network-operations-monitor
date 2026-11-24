@@ -1,0 +1,2149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloudflare, Raspberry Pi 5 &amp; ESP-32S Network Operations Center</title>
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="alternate icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='%230f172a' stroke='%2338bdf8' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%231e3a5f' stroke-width='1.5' stroke-dasharray='4 3'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='%231e3a5f' stroke-width='1.2'/%3E%3Cline x1='32' y1='32' x2='17' y2='18' stroke='%2338bdf8' stroke-width='2' stroke-opacity='0.75'/%3E%3Cline x1='32' y1='32' x2='48' y2='19' stroke='%2338bdf8' stroke-width='2' stroke-opacity='0.75'/%3E%3Cline x1='32' y1='32' x2='47' y2='46' stroke='%2338bdf8' stroke-width='2' stroke-opacity='0.75'/%3E%3Cpolyline points='8,36 18,36 23,24 29,43 35,20 40,36 56,36' fill='none' stroke='%2322c55e' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='17' cy='18' r='3.5' fill='%2338bdf8'/%3E%3Ccircle cx='48' cy='19' r='3.5' fill='%2338bdf8'/%3E%3Ccircle cx='47' cy='46' r='3.5' fill='%2322c55e'/%3E%3Ccircle cx='35' cy='20' r='4' fill='%23f97316' stroke='%230f172a' stroke-width='1.5'/%3E%3C/svg%3E">
+    <style>
+        html { scroll-behavior: smooth; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 2rem; }
+        h1 { margin-bottom: 0.4rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
+        h2 { color: #e2e8f0; border-bottom: 1px solid #1e293b; padding-bottom: 0.5rem; margin-top: 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+        #sec-gemma-ai, #sec-edge-domains, #sec-cloud-billing, #sec-durable-objects, #sec-workers-ai, #sec-d1-databases, #sec-kv-storage, #sec-r2-storage, #sec-rpi5, #sec-esp32 { scroll-margin-top: 4.75rem; }
+        .top-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; }
+        .action-bar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+        .nav-pills {
+            position: sticky;
+            top: 0.75rem;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 1.75rem;
+            padding: 0.5rem 0.75rem;
+            width: fit-content;
+            max-width: 100%;
+            box-sizing: border-box;
+            background: rgba(15, 23, 42, 0.58);
+            backdrop-filter: blur(10px) saturate(140%);
+            -webkit-backdrop-filter: blur(10px) saturate(140%);
+            border-radius: 999px;
+            border: 1px solid rgba(56, 189, 248, 0.2);
+            box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
+            transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+        }
+        .nav-pills:hover {
+            background: rgba(15, 23, 42, 0.85);
+            border-color: rgba(56, 189, 248, 0.38);
+        }
+        .nav-pills-list {
+            display: flex;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .mobile-nav-toggle {
+            display: none;
+        }
+        .mobile-nav-overflow-hint {
+            display: none;
+        }
+        .nav-pill {
+            font-size: 0.79rem;
+            color: rgba(226, 232, 240, 0.9);
+            background: rgba(22, 34, 56, 0.6);
+            padding: 0.33rem 0.78rem;
+            border-radius: 999px;
+            border: 1px solid rgba(56, 189, 248, 0.25);
+            text-decoration: none;
+            transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
+        }
+        .nav-pill:hover, .nav-pill.active {
+            background: rgba(56, 189, 248, 0.2);
+            color: #38bdf8;
+            border-color: rgba(56, 189, 248, 0.75);
+        }
+        .domain-section { margin-bottom: 2.25rem; background: #111c30; padding: 1.5rem; border-radius: 12px; border: 1px solid #1e293b; }
+        .domain-title { font-size: 1.38rem; color: #38bdf8; font-weight: bold; margin-top: 0; border-bottom: 2px solid #1e293b; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+        .subsection-title { font-size: 0.95rem; color: #cbd5e1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 1.4rem 0 0.6rem 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
+        .subtitle-badge { font-size: 0.8rem; font-weight: normal; color: #94a3b8; background: #1e293b; padding: 0.25rem 0.65rem; border-radius: 999px; border: 1px solid #334155; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.15rem; margin-top: 1rem; }
+        .card { background: #1e293b; padding: 1.15rem; border-radius: 8px; border: 1px solid #334155; }
+        .card h3 { margin: 0 0 0.6rem 0; font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; }
+        .metric { font-size: 1.55rem; font-weight: bold; color: #f97316; }
+        .metric-sub { font-size: 0.8rem; color: #94a3b8; margin-top: 0.35rem; line-height: 1.45; }
+        .status-healthy { color: #22c55e; }
+        .status-warn { color: #eab308; }
+        .status-crit { color: #ef4444; }
+        .status-info { color: #38bdf8; }
+        .progress-track { width: 100%; height: 6px; background: #0f172a; border-radius: 999px; overflow: hidden; margin-top: 0.5rem; }
+        .progress-bar { height: 100%; border-radius: 999px; transition: width 0.3s ease; }
+        .bg-healthy { background: #22c55e; }
+        .bg-warn { background: #eab308; }
+        .bg-crit { background: #ef4444; }
+        .bg-info { background: #38bdf8; }
+        .table-wrap { margin-top: 1.1rem; overflow-x: auto; }
+        table.breakdown-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+        table.breakdown-table th { text-align: left; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.04em; padding: 0.6rem 0.75rem; border-bottom: 1px solid #334155; background: #162238; white-space: nowrap; }
+        table.breakdown-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #1e293b; color: #e2e8f0; vertical-align: middle; }
+        table.breakdown-table tr:last-child td { border-bottom: none; }
+        table.breakdown-table tr:hover td { background: rgba(30, 41, 59, 0.55); }
+        .tag { display: inline-block; font-size: 0.71rem; padding: 0.12rem 0.45rem; border-radius: 4px; background: #0f172a; color: #38bdf8; border: 1px solid #1e3a5f; margin-left: 0.4rem; white-space: nowrap; }
+        .tag-green { background: rgba(34, 197, 94, 0.12); color: #4ade80; border-color: rgba(34, 197, 94, 0.35); }
+        .tag-amber { background: rgba(234, 179, 8, 0.12); color: #facc15; border-color: rgba(234, 179, 8, 0.35); }
+        .tag-red { background: rgba(239, 68, 68, 0.12); color: #f87171; border-color: rgba(239, 68, 68, 0.35); }
+        .tag-purple { background: rgba(168, 85, 247, 0.14); color: #c084fc; border-color: rgba(168, 85, 247, 0.35); }
+        .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.82rem; }
+        #system-meta { font-size: 0.92rem; color: #94a3b8; line-height: 1.6; }
+        .snooze-btn, .action-btn {
+            background: #0f172a;
+            color: #38bdf8;
+            border: 1px solid #1e3a5f;
+            border-radius: 6px;
+            padding: 0.28rem 0.65rem;
+            font-size: 0.76rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .snooze-btn:hover, .action-btn:hover {
+            background: #0284c7;
+            color: #ffffff;
+            border-color: #38bdf8;
+            box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+        }
+        .action-btn:disabled {
+            opacity: 0.55;
+            cursor: wait;
+        }
+        .unsnooze-btn {
+            background: #0f172a;
+            color: #f87171;
+            border: 1px solid #7f1d1d;
+            border-radius: 6px;
+            padding: 0.22rem 0.55rem;
+            font-size: 0.74rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.15s ease;
+        }
+        .unsnooze-btn:hover {
+            background: #dc2626;
+            color: #ffffff;
+            border-color: #f87171;
+            box-shadow: 0 0 8px rgba(248, 113, 113, 0.4);
+        }
+        .ask-bar {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 0.85rem;
+            flex-wrap: wrap;
+        }
+        .ask-input {
+            flex: 1;
+            min-width: 240px;
+            background: #0b1329;
+            border: 1px solid #1e3a5f;
+            color: #f8fafc;
+            border-radius: 6px;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.86rem;
+            outline: none;
+        }
+        .ask-input:focus {
+            border-color: #38bdf8;
+            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+        }
+        /* Foldable Autonomous NOC Assessment Card */
+        .assessment-collapsible {
+            margin-top: 1rem;
+            background: #0f172a;
+            border: 1px solid #1e3a5f;
+            border-radius: 8px;
+            overflow: hidden;
+            transition: border-color 0.2s ease;
+        }
+        .assessment-collapsible:hover {
+            border-color: rgba(56, 189, 248, 0.55);
+        }
+        .assessment-toggle-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 0.75rem;
+            flex-wrap: wrap;
+            padding: 0.85rem 1.1rem;
+            background: rgba(22, 34, 56, 0.65);
+            border: none;
+            color: #f8fafc;
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+        }
+        .assessment-toggle-header:hover {
+            background: rgba(30, 41, 59, 0.85);
+        }
+        .assessment-toggle-title {
+            display: flex;
+            align-items: center;
+            gap: 0.55rem;
+            font-size: 0.84rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: #cbd5e1;
+        }
+        .assessment-chevron {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.76rem;
+            font-weight: 600;
+            color: #38bdf8;
+            background: #0b1329;
+            border: 1px solid #1e3a5f;
+            border-radius: 999px;
+            padding: 0.2rem 0.65rem;
+        }
+        .assessment-body {
+            padding: 1rem 1.15rem 1.15rem 1.15rem;
+            border-top: 1px solid #1e293b;
+        }
+        .assessment-body.folded {
+            display: none;
+        }
+        /* Collapsible Workers AI Autonomous NOC Analyst Panel (all viewports) */
+        .ai-analyst-collapsible {
+            padding: 0;
+            overflow: hidden;
+        }
+        .ai-analyst-toggle-header {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.65rem;
+            padding: 1.1rem 1.5rem;
+            background: transparent;
+            border: none;
+            color: #38bdf8;
+            cursor: pointer;
+            text-align: left;
+            font-family: inherit;
+            transition: background 0.18s ease;
+        }
+        .ai-analyst-toggle-header:hover {
+            background: rgba(56, 189, 248, 0.06);
+        }
+        .ai-analyst-title-group {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .ai-analyst-title-text {
+            font-size: 1.32rem;
+            font-weight: 700;
+            color: #38bdf8;
+        }
+        .ai-analyst-header-right {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .ai-analyst-body {
+            padding: 0 1.5rem 1.5rem 1.5rem;
+            border-top: 1px solid #1e293b;
+        }
+        .ai-analyst-body.folded {
+            display: none;
+        }
+        /* Responsive Mobile Navigation & Layout (<= 768px) */
+        @media (max-width: 768px) {
+            body {
+                margin: 0.9rem;
+            }
+            h1 {
+                font-size: 1.35rem;
+            }
+            h2 {
+                font-size: 1.15rem;
+                margin-top: 2rem;
+            }
+            .domain-section {
+                padding: 1rem;
+            }
+            .ai-analyst-collapsible {
+                padding: 0;
+            }
+            .ai-analyst-toggle-header {
+                padding: 0.9rem 1rem;
+            }
+            .ai-analyst-title-text {
+                font-size: 1.05rem;
+            }
+            .ai-analyst-meta-badge {
+                font-size: 0.72rem;
+            }
+            .ai-analyst-body {
+                padding: 0 1rem 1rem 1rem;
+            }
+            .ask-input {
+                min-width: 0;
+                width: 100%;
+            }
+            .nav-pills {
+                top: 0.5rem;
+                width: 100%;
+                padding: 0;
+                border-radius: 14px;
+                background: rgba(15, 23, 42, 0.92);
+                border-color: rgba(56, 189, 248, 0.32);
+                overflow: hidden;
+            }
+            .mobile-nav-toggle {
+                display: flex;
+                width: 100%;
+                justify-content: space-between;
+                align-items: center;
+                gap: 0.5rem;
+                padding: 0.65rem 0.9rem;
+                background: transparent;
+                border: none;
+                color: #f8fafc;
+                font-family: inherit;
+                font-size: 0.86rem;
+                font-weight: 600;
+                cursor: pointer;
+                text-align: left;
+            }
+            .mobile-nav-toggle:hover {
+                background: rgba(30, 41, 59, 0.55);
+            }
+            .mobile-nav-toggle-left {
+                display: flex;
+                align-items: center;
+                gap: 0.5rem;
+                min-width: 0;
+            }
+            .mobile-nav-icon {
+                color: #38bdf8;
+                font-size: 1rem;
+                line-height: 1;
+            }
+            .mobile-nav-current {
+                font-size: 0.75rem;
+                font-weight: 600;
+                color: #38bdf8;
+                background: rgba(56, 189, 248, 0.14);
+                border: 1px solid rgba(56, 189, 248, 0.35);
+                border-radius: 999px;
+                padding: 0.12rem 0.55rem;
+                max-width: 44vw;
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
+            .mobile-nav-chevron {
+                flex-shrink: 0;
+                font-size: 0.76rem;
+                font-weight: 600;
+                color: #38bdf8;
+                background: #0b1329;
+                border: 1px solid #1e3a5f;
+                border-radius: 999px;
+                padding: 0.2rem 0.65rem;
+            }
+            /* Folded by default on mobile; unfolds only when .mobile-expanded is active */
+            .nav-pills-list {
+                display: none;
+            }
+            .nav-pills.mobile-expanded .nav-pills-list {
+                display: flex;
+                flex-direction: column;
+                flex-wrap: nowrap;
+                align-items: stretch;
+                gap: 6px;
+                padding: 8px 10px;
+                border-top: 1px solid rgba(56, 189, 248, 0.2);
+                overflow-y: auto;
+                overscroll-behavior: contain;
+                -webkit-overflow-scrolling: touch;
+                scroll-snap-type: y proximity;
+                box-sizing: border-box;
+            }
+            .nav-pills.mobile-expanded .nav-pill {
+                display: flex;
+                align-items: center;
+                flex: 0 0 auto;
+                box-sizing: border-box;
+                min-height: 38px;
+                padding: 0.45rem 0.78rem;
+                border-radius: 10px;
+                font-size: 0.85rem;
+                scroll-snap-align: start;
+            }
+            .nav-pills.mobile-expanded .mobile-nav-overflow-hint:not([hidden]) {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.38rem 0.9rem 0.45rem;
+                font-size: 0.74rem;
+                color: #94a3b8;
+                border-top: 1px solid rgba(56, 189, 248, 0.16);
+                background: rgba(11, 19, 41, 0.72);
+            }
+        }
+        /* Mini latency sparkline bars for ESP-32S 24h history */
+        .sparkline {
+            display: flex;
+            align-items: flex-end;
+            gap: 2px;
+            height: 28px;
+            margin-top: 0.55rem;
+            padding: 2px 0;
+        }
+        .spark-bar {
+            flex: 1;
+            min-width: 3px;
+            max-width: 10px;
+            border-radius: 2px 2px 0 0;
+            transition: opacity 0.15s;
+        }
+        .spark-bar:hover {
+            opacity: 0.8;
+        }
+        .core-pills {
+            display: flex;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+            margin-top: 0.45rem;
+        }
+        .core-pill {
+            font-size: 0.72rem;
+            padding: 0.12rem 0.42rem;
+            border-radius: 4px;
+            background: #0f172a;
+            border: 1px solid #334155;
+            color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+    <h1>
+        <span>☁️ Cloudflare, Raspberry Pi 5 &amp; ESP-32S Network Operations Center</span>
+        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+            <span id="telegram-badge" class="subtitle-badge">📨 Telegram: Checking...</span>
+            <span id="access-badge" class="subtitle-badge">🔒 Cloudflare Access Protected</span>
+        </div>
+    </h1>
+    <div class="top-bar">
+        <div id="system-meta">
+            Telemetry Sync: <span id="last-updated">Connecting...</span> |
+            Edge Worker &amp; DO: <span id="daemon-health" class="status-healthy">ONLINE</span> |
+            Billing Cycle (UTC): <span id="billing-cycle">--</span>
+        </div>
+        <div class="action-bar">
+            <button id="btn-refresh" class="action-btn" onclick="manualRefreshTelemetry()">🔄 Refresh Telemetry</button>
+            <button id="btn-analyze" class="action-btn" onclick="triggerManualAnalysis()">🤖 Run AI Analysis</button>
+            <button id="btn-tg-test" class="action-btn" onclick="sendTelegramTest()">📨 Test Telegram</button>
+            <button id="btn-tg-setup" class="action-btn" onclick="setupTelegramBot()">🔗 Sync Bot Webhook</button>
+        </div>
+    </div>
+
+    <nav class="nav-pills" id="noc-nav" aria-label="Dashboard sections">
+        <button type="button" id="mobile-nav-toggle" class="mobile-nav-toggle" onclick="toggleMobileNav()" aria-expanded="false" aria-controls="nav-pills-list">
+            <span class="mobile-nav-toggle-left">
+                <span class="mobile-nav-icon" aria-hidden="true">☰</span>
+                <span class="mobile-nav-label">Sections</span>
+                <span id="mobile-nav-current" class="mobile-nav-current">AI NOC Analyst</span>
+            </span>
+            <span id="mobile-nav-chevron" class="mobile-nav-chevron">▸ Menu</span>
+        </button>
+        <div id="nav-pills-list" class="nav-pills-list">
+            <a class="nav-pill" href="#sec-gemma-ai">AI NOC Analyst</a>
+            <a class="nav-pill" href="#sec-edge-domains">Edge Domains</a>
+            <a class="nav-pill" href="#sec-cloud-billing">Workers &amp; Pages</a>
+            <a class="nav-pill" href="#sec-durable-objects">Durable Objects</a>
+            <a class="nav-pill" href="#sec-workers-ai">Workers AI</a>
+            <a class="nav-pill" href="#sec-d1-databases">D1 SQL</a>
+            <a class="nav-pill" href="#sec-kv-storage">Workers KV</a>
+            <a class="nav-pill" href="#sec-r2-storage">R2 Storage</a>
+            <a class="nav-pill" href="#sec-rpi5">🍓 Raspberry Pi 5</a>
+            <a class="nav-pill" href="#sec-esp32">📡 ESP-32S</a>
+        </div>
+        <div id="mobile-nav-overflow-hint" class="mobile-nav-overflow-hint" hidden></div>
+    </nav>
+
+    <!-- 0. Autonomous Workers AI NOC Analysis & Snooze Manager -->
+    <div id="sec-gemma-ai"></div>
+    <div id="gemma-ai-container"></div>
+
+    <!-- 1. Active Cloudflare Edge Domain Groups -->
+    <h2 id="sec-edge-domains">Cloudflare Edge Domains Telemetry</h2>
+    <div id="domains-container"></div>
+
+    <!-- 2. Account Billing & Platform Usage Sections -->
+    <h2 id="sec-cloud-billing">Cloudflare Account Billing &amp; Platform Quotas</h2>
+    <div id="workers-pages-container"></div>
+
+    <div id="sec-durable-objects"></div>
+    <div id="durable-objects-container"></div>
+
+    <div id="sec-workers-ai"></div>
+    <div id="workers-ai-container"></div>
+
+    <h2 id="sec-d1-databases">D1 Database Clusters Billing &amp; Storage Limits</h2>
+    <div id="d1-container"></div>
+
+    <h2 id="sec-kv-storage">Workers KV Operations &amp; Storage Quotas</h2>
+    <div id="kv-container"></div>
+
+    <h2 id="sec-r2-storage">R2 Object Storage Operations &amp; Capacity</h2>
+    <div id="r2-container"></div>
+
+    <!-- 3. Raspberry Pi 5 Edge Host, Qdrant, Brain Sync & Services (15m Cron) -->
+    <h2 id="sec-rpi5">🍓 Raspberry Pi 5 Edge Host, Qdrant, Sync &amp; Critical Services</h2>
+    <div id="rpi5-container"></div>
+
+    <!-- 4. ESP-32S Out-of-Band Hardware Watchdog Monitor -->
+    <h2 id="sec-esp32">📡 ESP-32S Out-of-Band Watchdog Monitor</h2>
+    <div id="esp32-container"></div>
+
+    <script>
+        const MOBILE_NAV_BREAKPOINT_PX = 768;
+        let lastAskReplyHtml = '';
+        let mobileNavExpanded = false;
+        let aiAnalystExpanded = (() => {
+            try {
+                return localStorage.getItem('noc_ai_analyst_expanded') === 'true';
+            } catch {
+                return false;
+            }
+        })();
+        let assessmentExpanded = (() => {
+            try {
+                return localStorage.getItem('noc_assessment_expanded') === 'true';
+            } catch {
+                return false;
+            }
+        })();
+
+        function isMobileViewport() {
+            return window.innerWidth <= MOBILE_NAV_BREAKPOINT_PX;
+        }
+
+        function computeMobileNavLayout({
+            viewportHeight,
+            navBottom,
+            itemHeight,
+            gap,
+            paddingY,
+            totalItems,
+            footerHeight = 32,
+            bottomMargin = 16,
+            maxViewportRatio = 0.68,
+        }) {
+            const safeTotal = Math.max(0, Math.floor(Number(totalItems) || 0));
+            if (safeTotal === 0) {
+                return { visibleCount: 0, maxHeightPx: 0, hasOverflow: false };
+            }
+            const safeVpH = Math.max(120, Number(viewportHeight) || 640);
+            const safeNavBottom = Math.max(0, Number(navBottom) || 56);
+            const safeItemH = Math.max(24, Number(itemHeight) || 38);
+            const safeGap = Math.max(0, Number(gap) || 6);
+            const safePadY = Math.max(0, Number(paddingY) || 16);
+
+            const availBelow = Math.max(0, safeVpH - safeNavBottom - bottomMargin);
+            const ratioCap = Math.max(safeItemH + safePadY, Math.floor(safeVpH * maxViewportRatio));
+            const maxBudgetNoFooter = Math.min(availBelow, ratioCap);
+
+            const fullHeight = safeTotal * safeItemH + Math.max(0, safeTotal - 1) * safeGap + safePadY;
+            if (fullHeight <= maxBudgetNoFooter) {
+                return {
+                    visibleCount: safeTotal,
+                    maxHeightPx: Math.ceil(fullHeight),
+                    hasOverflow: false,
+                };
+            }
+
+            const budgetWithFooter = Math.max(safeItemH + safePadY, maxBudgetNoFooter - footerHeight);
+            const step = safeItemH + safeGap;
+            const rawFit = Math.floor((budgetWithFooter - safePadY + safeGap) / step);
+            const visibleCount = Math.max(1, Math.min(safeTotal, rawFit));
+            const padTop = Math.floor(safePadY / 2);
+            const bottomBreathingRoom = safeGap > 1 ? Math.min(safePadY - padTop, safeGap - 2) : 0;
+            const exactHeight = padTop + visibleCount * safeItemH + Math.max(0, visibleCount - 1) * safeGap + bottomBreathingRoom;
+
+            return {
+                visibleCount,
+                maxHeightPx: Math.ceil(exactHeight),
+                hasOverflow: visibleCount < safeTotal,
+            };
+        }
+
+        function fitMobileNavToViewport() {
+            const nav = document.getElementById('noc-nav');
+            const toggleBtn = document.getElementById('mobile-nav-toggle');
+            const listEl = document.getElementById('nav-pills-list');
+            const hintEl = document.getElementById('mobile-nav-overflow-hint');
+            if (!nav || !listEl) return null;
+
+            if (!isMobileViewport() || !mobileNavExpanded) {
+                listEl.style.maxHeight = '';
+                if (listEl.dataset) delete listEl.dataset.visibleCount;
+                if (hintEl) {
+                    hintEl.hidden = true;
+                    hintEl.textContent = '';
+                }
+                return null;
+            }
+
+            const pills = Array.from(listEl.querySelectorAll('.nav-pill'));
+            const firstPillRect = pills[0]?.getBoundingClientRect ? pills[0].getBoundingClientRect() : null;
+            const itemHeight = firstPillRect && firstPillRect.height > 0 ? firstPillRect.height : 38;
+            const toggleRect = toggleBtn?.getBoundingClientRect ? toggleBtn.getBoundingClientRect() : null;
+            const navBottom = toggleRect && toggleRect.bottom > 0 ? toggleRect.bottom : 56;
+
+            let gap = 6;
+            let paddingY = 16;
+            if (typeof window.getComputedStyle === 'function') {
+                const cs = window.getComputedStyle(listEl);
+                const parsedGap = parseFloat(cs?.rowGap || cs?.gap || '');
+                const parsedPadTop = parseFloat(cs?.paddingTop || '');
+                const parsedPadBottom = parseFloat(cs?.paddingBottom || '');
+                if (Number.isFinite(parsedGap) && parsedGap >= 0) gap = parsedGap;
+                if (Number.isFinite(parsedPadTop) && Number.isFinite(parsedPadBottom)) {
+                    paddingY = parsedPadTop + parsedPadBottom;
+                }
+            }
+
+            const layout = computeMobileNavLayout({
+                viewportHeight: window.innerHeight,
+                navBottom,
+                itemHeight,
+                gap,
+                paddingY,
+                totalItems: pills.length,
+            });
+
+            listEl.style.maxHeight = layout.maxHeightPx + 'px';
+            if (listEl.dataset) listEl.dataset.visibleCount = String(layout.visibleCount);
+
+            if (hintEl) {
+                if (layout.hasOverflow) {
+                    hintEl.hidden = false;
+                    hintEl.textContent = `Showing ${layout.visibleCount} of ${pills.length} sections • Scroll for more ↕`;
+                } else {
+                    hintEl.hidden = true;
+                    hintEl.textContent = '';
+                }
+            }
+            return layout;
+        }
+
+        function setMobileNavExpanded(expanded) {
+            mobileNavExpanded = Boolean(expanded) && isMobileViewport();
+            const nav = document.getElementById('noc-nav');
+            const toggleBtn = document.getElementById('mobile-nav-toggle');
+            const chev = document.getElementById('mobile-nav-chevron');
+            if (nav) nav.classList.toggle('mobile-expanded', mobileNavExpanded);
+            if (toggleBtn) toggleBtn.setAttribute('aria-expanded', String(mobileNavExpanded));
+            if (chev) chev.textContent = mobileNavExpanded ? '▾ Close' : '▸ Menu';
+            const layout = fitMobileNavToViewport();
+            if (mobileNavExpanded) {
+                const activePill = document.querySelector('#nav-pills-list .nav-pill.active');
+                if (activePill && typeof activePill.scrollIntoView === 'function') {
+                    activePill.scrollIntoView({ block: 'nearest' });
+                }
+            }
+            return layout;
+        }
+
+        function toggleMobileNav() {
+            return setMobileNavExpanded(!mobileNavExpanded);
+        }
+
+        function toggleAiAnalyst() {
+            aiAnalystExpanded = !aiAnalystExpanded;
+            try {
+                localStorage.setItem('noc_ai_analyst_expanded', String(aiAnalystExpanded));
+            } catch {}
+            const body = document.getElementById('ai-analyst-body');
+            const chev = document.getElementById('ai-analyst-chevron');
+            const btn = document.getElementById('ai-analyst-toggle');
+            if (body) body.classList.toggle('folded', !aiAnalystExpanded);
+            if (chev) chev.innerHTML = aiAnalystExpanded ? '▾ Collapse' : '▸ Expand';
+            if (btn) btn.setAttribute('aria-expanded', String(aiAnalystExpanded));
+        }
+
+        function toggleNocAssessment() {
+            assessmentExpanded = !assessmentExpanded;
+            try {
+                localStorage.setItem('noc_assessment_expanded', String(assessmentExpanded));
+            } catch {}
+            const body = document.getElementById('noc-assessment-body');
+            const chev = document.getElementById('noc-assessment-chevron');
+            const btn = document.getElementById('noc-assessment-toggle');
+            if (body) body.classList.toggle('folded', !assessmentExpanded);
+            if (chev) chev.innerHTML = assessmentExpanded ? '▾ Collapse' : '▸ Expand';
+            if (btn) btn.setAttribute('aria-expanded', String(assessmentExpanded));
+        }
+
+        function getQuotaClass(pct) {
+            if (pct >= 80) return 'status-crit';
+            if (pct >= 60) return 'status-warn';
+            return 'status-healthy';
+        }
+
+        function getProgressClass(pct) {
+            if (pct >= 80) return 'bg-crit';
+            if (pct >= 60) return 'bg-warn';
+            return 'bg-healthy';
+        }
+
+        function getThresholdClass(val, warn, crit) {
+            if (val === null || val === undefined) return 'status-info';
+            if (val >= crit) return 'status-crit';
+            if (val >= warn) return 'status-warn';
+            return 'status-healthy';
+        }
+
+        function clampPct(pct) {
+            return Math.min(100, Math.max(0, Number(pct) || 0));
+        }
+
+        function formatSyncTimestamp(utcStr) {
+            if (!utcStr) return 'Unknown';
+            const m = String(utcStr).match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})/);
+            if (!m) return utcStr;
+            const utcMs = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+            const gmt4 = new Date(utcMs - 4 * 3600 * 1000);
+            const pad = (n) => String(n).padStart(2, '0');
+            const gmt4Time = `${pad(gmt4.getUTCHours())}:${pad(gmt4.getUTCMinutes())}:${pad(gmt4.getUTCSeconds())} GMT-4`;
+            return `${utcStr} (${gmt4Time})`;
+        }
+
+        function computeAgeMinutes(utcStr) {
+            if (!utcStr) return null;
+            const m = String(utcStr).match(/^(\d{4})-(\d{2})-(\d{2})[T\s](\d{2}):(\d{2}):(\d{2})/);
+            if (!m) return null;
+            const utcMs = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
+            return Math.max(0, Math.floor((Date.now() - utcMs) / 60000));
+        }
+
+        const escapeHtml = (s) => String(s ?? '')
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+
+        const formatAiMarkdown = (raw) => escapeHtml(raw)
+            .replace(/\*\*([^*]+)\*\*/g, '<strong style="color:#f8fafc;">$1</strong>')
+            .replace(/`([^`]+)`/g, '<code class="mono" style="background:#0f172a; padding:0.1rem 0.35rem; border-radius:4px; color:#38bdf8; border:1px solid #1e3a5f;">$1</code>');
+
+        async function updateDashboard(forceRefresh = false) {
+            try {
+                const refreshParam = forceRefresh ? '&refresh=1' : '';
+                const response = await fetch('metrics.json?cache_bust=' + Date.now() + refreshParam);
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+                const data = await response.json();
+
+                document.getElementById('last-updated').innerText = formatSyncTimestamp(data.last_updated);
+                document.getElementById('daemon-health').innerText = "ONLINE";
+                document.getElementById('daemon-health').className = "status-healthy";
+
+                const bp = data.billing_period || {};
+                document.getElementById('billing-cycle').innerText =
+                    bp.month_start ? `${bp.month_start} → ${bp.current_date_utc}` : 'Current Month';
+
+                // Operator & Telegram status badge
+                fetch('/api/status').then(r => r.ok ? r.json() : null).then(st => {
+                    if (st && st.operator && st.operator !== 'cloudflare-access-user') {
+                        document.getElementById('access-badge').innerText = `🔒 Cloudflare Access • ${st.operator}`;
+                    }
+                    const tgBadge = document.getElementById('telegram-badge');
+                    if (tgBadge && st && st.telegram) {
+                        if (st.telegram.configured) {
+                            const sentCnt = st.telegram.alerts_sent_total ?? 0;
+                            const cmdCnt = st.telegram.commands_handled_total ?? 0;
+                            tgBadge.innerHTML = `📨 Telegram: <strong class="status-healthy">READY</strong> (${sentCnt} alerts • ${cmdCnt} cmds)`;
+                        } else {
+                            tgBadge.innerHTML = `📨 Telegram: <strong class="status-warn">SECRETS PENDING</strong>`;
+                        }
+                    }
+                }).catch(() => {});
+
+                // 0. Workers AI Autonomous NOC Analysis & Foldable Assessment
+                try {
+                    const aiResp = await fetch('ai_analysis.json?cache_bust=' + Date.now());
+                    if (aiResp.ok) {
+                        const aiData = await aiResp.json();
+                        renderAiSection(aiData);
+                    }
+                } catch (e) {}
+
+                // 1. Cloudflare Edge Domains
+                const domainsContainer = document.getElementById('domains-container');
+                domainsContainer.innerHTML = '';
+
+                const domainEntries = Object.entries(data.domains || {});
+                if (domainEntries.length === 0) {
+                    domainsContainer.innerHTML = '<div class="domain-section"><p style="color:#94a3b8; margin:0;">No monitored domains found in metrics payload.</p></div>';
+                }
+
+                for (const [domainName, metrics] of domainEntries) {
+                    const chrClass = metrics.cache_hit_ratio > 70 ? 'status-healthy' : 'status-warn';
+                    const secClass = metrics.security_events > 0 ? 'status-crit' : 'status-healthy';
+                    const errClass = metrics.errors_5xx_2h_consecutive_over_100 ? 'status-warn' : 'status-healthy';
+                    const statusClass = metrics.status === "HEALTHY" ? 'status-healthy' : 'status-crit';
+                    const prevHr5xx = metrics.errors_5xx_prev_hour ?? 0;
+
+                    domainsContainer.innerHTML += `
+                        <div class="domain-section">
+                            <div class="domain-title">
+                                <span>${escapeHtml(domainName)}</span>
+                                <span class="subtitle-badge">Edge Zone (Past 1h) • 5xx Alert Rule: ≥100/hr × 2h</span>
+                            </div>
+                            <div class="grid">
+                                <div class="card">
+                                    <h3>Edge Routing Status</h3>
+                                    <div class="metric ${statusClass}">${escapeHtml(metrics.status)}</div>
+                                </div>
+                                <div class="card">
+                                    <h3>Traffic Vol (Past Hour)</h3>
+                                    <div class="metric">${(metrics.hit_volume ?? 0).toLocaleString()}</div>
+                                </div>
+                                <div class="card">
+                                    <h3>Bandwidth Ingestion</h3>
+                                    <div class="metric">${metrics.bandwidth_gb ?? 0} GB</div>
+                                </div>
+                                <div class="card">
+                                    <h3>Cache Hit Ratio</h3>
+                                    <div class="metric ${chrClass}">${metrics.cache_hit_ratio ?? 0}%</div>
+                                </div>
+                                <div class="card">
+                                    <h3>Threats Blocked</h3>
+                                    <div class="metric ${secClass}">${metrics.security_events ?? 0}</div>
+                                </div>
+                                <div class="card">
+                                    <h3>Origin Gateway Errors (5xx)</h3>
+                                    <div class="metric ${errClass}">${metrics.errors_5xx ?? 0}</div>
+                                    <div class="metric-sub">Prev 1h: ${prevHr5xx} • ≥100/hr × 2h streak: ${metrics.errors_5xx_2h_consecutive_over_100 ? '<strong class="status-warn">ALERT</strong>' : 'Nominal'}</div>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // 2. Workers & Pages
+                const wp = data.workers_and_pages || {};
+                const wpContainer = document.getElementById('workers-pages-container');
+                const wpDailyPct = wp.daily_requests_pct ?? 0;
+                const wpBuildPct = wp.monthly_build_minutes_pct ?? 0;
+                const wpErrClass = (wp.mtd_errors ?? 0) > 0 ? 'status-warn' : 'status-healthy';
+
+                let scriptsRowsHtml = '';
+                (wp.scripts || []).forEach(s => {
+                    const sErrClass = (s.errors_mtd ?? 0) > 0 ? 'status-crit' : 'status-healthy';
+                    scriptsRowsHtml += `
+                        <tr>
+                            <td><strong>${escapeHtml(s.name)}</strong><span class="tag">${escapeHtml(s.type || 'Worker')}</span></td>
+                            <td>${(s.requests_today ?? 0).toLocaleString()}</td>
+                            <td>${(s.requests_mtd ?? 0).toLocaleString()}</td>
+                            <td>${(s.subrequests_mtd ?? 0).toLocaleString()}</td>
+                            <td>${(s.cpu_time_ms_mtd ?? 0).toLocaleString()} ms</td>
+                            <td class="${sErrClass}">${(s.errors_mtd ?? 0).toLocaleString()}</td>
+                        </tr>
+                    `;
+                });
+
+                let assetsRowsHtml = '';
+                (wp.assets_hosts || []).forEach(a => {
+                    assetsRowsHtml += `
+                        <tr>
+                            <td><strong>${escapeHtml(a.hostname)}</strong><span class="tag">Static Assets (Free)</span></td>
+                            <td>${(a.requests_today ?? 0).toLocaleString()}</td>
+                            <td>${(a.requests_mtd ?? 0).toLocaleString()}</td>
+                        </tr>
+                    `;
+                });
+
+                wpContainer.innerHTML = `
+                    <div class="domain-section">
+                        <div class="domain-title">
+                            <span>Workers &amp; Pages Billing Usage</span>
+                            <span class="subtitle-badge">Est. Billable MTD: $${(wp.estimated_billable_usd ?? 0).toFixed(2)}</span>
+                        </div>
+                        <div class="grid">
+                            <div class="card">
+                                <h3>Daily Requests (UTC Quota)</h3>
+                                <div class="metric ${getQuotaClass(wpDailyPct)}">${(wp.daily_requests ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">${wpDailyPct}% of ${(wp.daily_requests_limit ?? 100000).toLocaleString()} / day free</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(wpDailyPct)}" style="width:${clampPct(wpDailyPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Worker Invocations (MTD)</h3>
+                                <div class="metric">${((wp.mtd_worker_requests ?? 0) + (wp.mtd_pages_requests ?? 0)).toLocaleString()}</div>
+                                <div class="metric-sub">Subrequests: ${(wp.mtd_subrequests ?? 0).toLocaleString()}</div>
+                            </div>
+                            <div class="card">
+                                <h3>Static Assets Served (MTD)</h3>
+                                <div class="metric status-healthy">${(wp.mtd_assets_requests ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">Unlimited / Free Tier</div>
+                            </div>
+                            <div class="card">
+                                <h3>Total CPU Time (MTD)</h3>
+                                <div class="metric">${(wp.mtd_cpu_time_ms ?? 0).toLocaleString()} ms</div>
+                                <div class="metric-sub">Errors MTD: <span class="${wpErrClass}">${(wp.mtd_errors ?? 0).toLocaleString()}</span></div>
+                            </div>
+                            <div class="card">
+                                <h3>Workers Build Minutes (MTD)</h3>
+                                <div class="metric ${getQuotaClass(wpBuildPct)}">${wp.mtd_build_minutes ?? 0} min</div>
+                                <div class="metric-sub">${wpBuildPct}% of ${(wp.monthly_build_minutes_limit ?? 3000).toLocaleString()} min / mo</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(wpBuildPct)}" style="width:${clampPct(wpBuildPct)}%"></div></div>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="breakdown-table">
+                                <thead>
+                                    <tr>
+                                        <th>Worker / Pages Script</th>
+                                        <th>Requests (Today)</th>
+                                        <th>Requests (MTD)</th>
+                                        <th>Subrequests (MTD)</th>
+                                        <th>CPU Time (MTD)</th>
+                                        <th>Errors (MTD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${scriptsRowsHtml || '<tr><td colspan="6" style="color:#94a3b8">No Worker or Pages scripts detected.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                        ${assetsRowsHtml ? `
+                        <div class="table-wrap">
+                            <table class="breakdown-table">
+                                <thead>
+                                    <tr>
+                                        <th>Static Asset Hostname</th>
+                                        <th>Asset Requests (Today)</th>
+                                        <th>Asset Requests (MTD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>${assetsRowsHtml}</tbody>
+                            </table>
+                        </div>` : ''}
+                    </div>
+                `;
+
+                // 3. Workers AI
+                const ai = data.workers_ai || {};
+                const aiContainer = document.getElementById('workers-ai-container');
+                const aiDailyPct = ai.daily_neurons_pct ?? 0;
+
+                let aiModelsHtml = '';
+                (ai.models || []).forEach(m => {
+                    aiModelsHtml += `
+                        <tr>
+                            <td><strong>${escapeHtml(m.model_id)}</strong></td>
+                            <td>${(m.requests_today ?? 0).toLocaleString()}</td>
+                            <td>${(m.requests_mtd ?? 0).toLocaleString()}</td>
+                            <td>${(m.neurons_mtd ?? 0).toLocaleString()}</td>
+                            <td>${(m.input_tokens_mtd ?? 0).toLocaleString()}</td>
+                            <td>${(m.output_tokens_mtd ?? 0).toLocaleString()}</td>
+                            <td>${((m.inference_time_ms_mtd ?? 0) / 1000).toFixed(2)} s</td>
+                        </tr>
+                    `;
+                });
+
+                aiContainer.innerHTML = `
+                    <div class="domain-section">
+                        <div class="domain-title">
+                            <span>Workers AI Billing &amp; Neuron Usage</span>
+                            <span class="subtitle-badge">Est. Billable MTD: $${(ai.estimated_billable_usd ?? 0).toFixed(4)}</span>
+                        </div>
+                        <div class="grid">
+                            <div class="card">
+                                <h3>Daily Neurons (UTC Quota)</h3>
+                                <div class="metric ${getQuotaClass(aiDailyPct)}">${(ai.daily_neurons ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">${aiDailyPct}% of ${(ai.daily_neurons_limit ?? 10000).toLocaleString()} free Neurons / day</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(aiDailyPct)}" style="width:${clampPct(aiDailyPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Total Neurons (MTD)</h3>
+                                <div class="metric">${(ai.mtd_neurons ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">Billable (over 10k/day): ${(ai.mtd_billable_neurons ?? 0).toLocaleString()}</div>
+                            </div>
+                            <div class="card">
+                                <h3>AI Inference Requests (MTD)</h3>
+                                <div class="metric">${(ai.mtd_requests ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">Today: ${(ai.daily_requests ?? 0).toLocaleString()} requests</div>
+                            </div>
+                            <div class="card">
+                                <h3>Tokens Processed (MTD)</h3>
+                                <div class="metric">${((ai.mtd_input_tokens ?? 0) + (ai.mtd_output_tokens ?? 0)).toLocaleString()}</div>
+                                <div class="metric-sub">In: ${(ai.mtd_input_tokens ?? 0).toLocaleString()} | Out: ${(ai.mtd_output_tokens ?? 0).toLocaleString()}</div>
+                            </div>
+                            <div class="card">
+                                <h3>Compute Duration (MTD)</h3>
+                                <div class="metric">${((ai.mtd_inference_time_ms ?? 0) / 1000).toFixed(1)} s</div>
+                                <div class="metric-sub">$0.011 per 1k billable Neurons</div>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="breakdown-table">
+                                <thead>
+                                    <tr>
+                                        <th>Model ID</th>
+                                        <th>Reqs (Today)</th>
+                                        <th>Reqs (MTD)</th>
+                                        <th>Neurons (MTD)</th>
+                                        <th>Input Tokens</th>
+                                        <th>Output Tokens</th>
+                                        <th>Inference Time</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${aiModelsHtml || '<tr><td colspan="7" style="color:#94a3b8">No Workers AI model invocations recorded this month.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                // 4. D1 SQL (50 Billion / month Rows Read Quota!)
+                const d1Container = document.getElementById('d1-container');
+                const d1b = data.d1_billing || {};
+                const dbs = data.d1_databases || [];
+                const d1ReadLimit = d1b.monthly_rows_read_limit ?? d1b.daily_rows_read_limit ?? 50000000000;
+                const d1ReadPct = d1b.monthly_rows_read_pct ?? d1b.daily_rows_read_pct ?? 0;
+                const d1WritePct = d1b.daily_rows_written_pct ?? 0;
+                const d1StoPct = d1b.account_storage_pct ?? 0;
+
+                let d1RowsHtml = '';
+                dbs.forEach(db => {
+                    const pctClass = getQuotaClass(db.capacity_pct ?? 0);
+                    d1RowsHtml += `
+                        <tr>
+                            <td><strong>${escapeHtml(db.name)}</strong> <span style="color:#94a3b8">(${escapeHtml((db.uuid || '').substring(0, 8))})</span></td>
+                            <td>${db.file_size_mb ?? 0} MB <span class="${pctClass}">(${db.capacity_pct ?? 0}% of 500 MB)</span></td>
+                            <td>${(db.rows_read_today ?? 0).toLocaleString()}</td>
+                            <td>${(db.rows_written_today ?? 0).toLocaleString()}</td>
+                            <td>${(db.rows_read ?? 0).toLocaleString()}</td>
+                            <td>${(db.rows_written ?? 0).toLocaleString()}</td>
+                            <td>${(db.read_queries ?? 0).toLocaleString()} R / ${(db.write_queries ?? 0).toLocaleString()} W</td>
+                        </tr>
+                    `;
+                });
+
+                d1Container.innerHTML = `
+                    <div class="domain-section">
+                        <div class="domain-title">
+                            <span>D1 Serverless SQL Billing &amp; Quotas</span>
+                            <span class="subtitle-badge">Read Ceiling: 50B / mo • Est. Billable MTD: $${(d1b.estimated_billable_usd ?? 0).toFixed(2)}</span>
+                        </div>
+                        <div class="grid">
+                            <div class="card">
+                                <h3>Rows Read (Monthly Quota)</h3>
+                                <div class="metric ${getQuotaClass(d1ReadPct)}">${(d1b.mtd_rows_read ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">${d1ReadPct}% of ${d1ReadLimit.toLocaleString()} / mo (50B) • Today: ${(d1b.daily_rows_read ?? 0).toLocaleString()}</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(d1ReadPct)}" style="width:${clampPct(d1ReadPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Daily Rows Written (UTC Quota)</h3>
+                                <div class="metric ${getQuotaClass(d1WritePct)}">${(d1b.daily_rows_written ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">${d1WritePct}% of ${(d1b.daily_rows_written_limit ?? 100000).toLocaleString()} / day</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(d1WritePct)}" style="width:${clampPct(d1WritePct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Daily Rows Read (Today UTC)</h3>
+                                <div class="metric">${(d1b.daily_rows_read ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">Read Queries MTD: ${(d1b.mtd_read_queries ?? 0).toLocaleString()}</div>
+                            </div>
+                            <div class="card">
+                                <h3>Rows Written (MTD)</h3>
+                                <div class="metric">${(d1b.mtd_rows_written ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">Write Queries MTD: ${(d1b.mtd_write_queries ?? 0).toLocaleString()}</div>
+                            </div>
+                            <div class="card">
+                                <h3>Total D1 Storage</h3>
+                                <div class="metric ${getQuotaClass(d1StoPct)}">${d1b.total_storage_mb ?? 0} MB</div>
+                                <div class="metric-sub">${d1StoPct}% of ${(d1b.account_storage_limit_mb ?? 5000).toLocaleString()} MB (5 GB) limit</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(d1StoPct)}" style="width:${clampPct(d1StoPct)}%"></div></div>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="breakdown-table">
+                                <thead>
+                                    <tr>
+                                        <th>Database Cluster</th>
+                                        <th>Storage Allocation</th>
+                                        <th>Rows Read (Today)</th>
+                                        <th>Rows Written (Today)</th>
+                                        <th>Rows Read (MTD)</th>
+                                        <th>Rows Written (MTD)</th>
+                                        <th>SQL Queries (MTD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${d1RowsHtml || '<tr><td colspan="7" style="color:#94a3b8">No managed D1 storage matrices detected.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                // 5. Durable Objects (50 Billion / month SQL Rows Read Quota!)
+                const doContainer = document.getElementById('durable-objects-container');
+                const doUsage = data.durable_objects || {};
+                const doReqPct = doUsage.daily_requests_pct ?? 0;
+                const doDurPct = doUsage.daily_duration_gbs_pct ?? 0;
+                const doReadLimit = doUsage.monthly_rows_read_limit ?? doUsage.daily_rows_read_limit ?? 50000000000;
+                const doReadPct = doUsage.monthly_rows_read_pct ?? doUsage.daily_rows_read_pct ?? 0;
+                const doWritePct = doUsage.daily_rows_written_pct ?? 0;
+                const doStoPct = doUsage.storage_pct ?? 0;
+                const doErrClass = (doUsage.mtd_errors ?? 0) > 0 ? 'status-warn' : 'status-healthy';
+
+                let doRowsHtml = '';
+                (doUsage.namespaces || []).forEach(ns => {
+                    const nsErrCls = (ns.errors_mtd ?? 0) > 0 ? 'status-crit' : 'status-healthy';
+                    const backendTag = ns.use_sqlite
+                        ? '<span class="tag tag-purple">SQLite</span>'
+                        : '<span class="tag">KV Store</span>';
+                    doRowsHtml += `
+                        <tr>
+                            <td><strong>${escapeHtml(ns.name)}</strong>${backendTag}</td>
+                            <td>${(ns.requests_today ?? 0).toLocaleString()}</td>
+                            <td>${(ns.requests_mtd ?? 0).toLocaleString()}</td>
+                            <td>${ns.duration_gbs_mtd ?? 0} GB-s</td>
+                            <td>${(ns.rows_read_today ?? 0).toLocaleString()} R / ${(ns.rows_written_today ?? 0).toLocaleString()} W</td>
+                            <td>${(ns.rows_read_mtd ?? 0).toLocaleString()} R / ${(ns.rows_written_mtd ?? 0).toLocaleString()} W</td>
+                            <td>${ns.storage_mb ?? 0} MB</td>
+                            <td class="${nsErrCls}">${(ns.errors_mtd ?? 0).toLocaleString()}</td>
+                        </tr>
+                    `;
+                });
+
+                doContainer.innerHTML = `
+                    <div class="domain-section">
+                        <div class="domain-title">
+                            <span>Durable Objects Compute &amp; SQLite Storage Quotas</span>
+                            <span class="subtitle-badge">SQL Read Ceiling: 50B / mo • Est. Billable MTD: $${(doUsage.estimated_billable_usd ?? 0).toFixed(2)}</span>
+                        </div>
+                        <div class="grid">
+                            <div class="card">
+                                <h3>Daily Requests (UTC Quota)</h3>
+                                <div class="metric ${getQuotaClass(doReqPct)}">${(doUsage.daily_requests ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">${doReqPct}% of ${(doUsage.daily_requests_limit ?? 100000).toLocaleString()} / day • MTD: ${(doUsage.mtd_requests ?? 0).toLocaleString()}</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(doReqPct)}" style="width:${clampPct(doReqPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Daily Duration (GB-s Quota)</h3>
+                                <div class="metric ${getQuotaClass(doDurPct)}">${doUsage.daily_duration_gbs ?? 0} GB-s</div>
+                                <div class="metric-sub">${doDurPct}% of ${(doUsage.daily_duration_gbs_limit ?? 13000).toLocaleString()} GB-s / day • MTD: ${doUsage.mtd_duration_gbs ?? 0} GB-s</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(doDurPct)}" style="width:${clampPct(doDurPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>SQL Rows Read (Monthly Quota)</h3>
+                                <div class="metric ${getQuotaClass(doReadPct)}">${(doUsage.mtd_rows_read ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">${doReadPct}% of ${doReadLimit.toLocaleString()} / mo (50B) • Today: ${(doUsage.daily_rows_read ?? 0).toLocaleString()}</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(doReadPct)}" style="width:${clampPct(doReadPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>SQL Rows Written (Daily Quota)</h3>
+                                <div class="metric ${getQuotaClass(doWritePct)}">${(doUsage.daily_rows_written ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">${doWritePct}% of ${(doUsage.daily_rows_written_limit ?? 100000).toLocaleString()} / day • MTD: ${(doUsage.mtd_rows_written ?? 0).toLocaleString()}</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(doWritePct)}" style="width:${clampPct(doWritePct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Total DO Storage</h3>
+                                <div class="metric ${getQuotaClass(doStoPct)}">${doUsage.total_storage_mb ?? 0} MB</div>
+                                <div class="metric-sub">${doStoPct}% of ${(doUsage.storage_limit_mb ?? 5000).toLocaleString()} MB (5 GB) • Errors MTD: <span class="${doErrClass}">${(doUsage.mtd_errors ?? 0).toLocaleString()}</span></div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(doStoPct)}" style="width:${clampPct(doStoPct)}%"></div></div>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="breakdown-table">
+                                <thead>
+                                    <tr>
+                                        <th>Durable Object Namespace</th>
+                                        <th>Reqs (Today)</th>
+                                        <th>Reqs (MTD)</th>
+                                        <th>Duration (MTD)</th>
+                                        <th>SQL R / W (Today)</th>
+                                        <th>SQL R / W (MTD)</th>
+                                        <th>Storage</th>
+                                        <th>Errors (MTD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${doRowsHtml || '<tr><td colspan="8" style="color:#94a3b8">No Durable Object namespaces or invocations detected.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                // 6. Workers KV
+                const kvContainer = document.getElementById('kv-container');
+                const kvb = data.kv_billing || {};
+                const kvReadPct = kvb.daily_reads_pct ?? 0;
+                const kvWritePct = kvb.daily_writes_pct ?? 0;
+                const kvDelPct = kvb.daily_deletes_pct ?? 0;
+                const kvListPct = kvb.daily_lists_pct ?? 0;
+                const kvStoPct = kvb.storage_pct ?? 0;
+
+                let kvRowsHtml = '';
+                (kvb.namespaces || []).forEach(ns => {
+                    kvRowsHtml += `
+                        <tr>
+                            <td><strong>${escapeHtml(ns.title)}</strong> <span style="color:#94a3b8">(${escapeHtml((ns.namespace_id || '').substring(0, 8))})</span></td>
+                            <td>${(ns.reads_today ?? 0).toLocaleString()} R / ${(ns.writes_today ?? 0).toLocaleString()} W</td>
+                            <td>${(ns.reads_mtd ?? 0).toLocaleString()}</td>
+                            <td>${(ns.writes_mtd ?? 0).toLocaleString()}</td>
+                            <td>${(ns.deletes_mtd ?? 0).toLocaleString()} D / ${(ns.lists_mtd ?? 0).toLocaleString()} L</td>
+                            <td>${(ns.key_count ?? 0).toLocaleString()}</td>
+                            <td>${ns.storage_mb ?? 0} MB</td>
+                        </tr>
+                    `;
+                });
+
+                kvContainer.innerHTML = `
+                    <div class="domain-section">
+                        <div class="domain-title">
+                            <span>Workers KV Operations &amp; Key-Value Storage</span>
+                            <span class="subtitle-badge">Est. Billable MTD: $${(kvb.estimated_billable_usd ?? 0).toFixed(2)}</span>
+                        </div>
+                        <div class="grid">
+                            <div class="card">
+                                <h3>Daily Reads (UTC Quota)</h3>
+                                <div class="metric ${getQuotaClass(kvReadPct)}">${(kvb.daily_reads ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">${kvReadPct}% of ${(kvb.daily_reads_limit ?? 100000).toLocaleString()} / day • MTD: ${(kvb.mtd_reads ?? 0).toLocaleString()}</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(kvReadPct)}" style="width:${clampPct(kvReadPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Daily Writes (UTC Quota)</h3>
+                                <div class="metric ${getQuotaClass(kvWritePct)}">${(kvb.daily_writes ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">${kvWritePct}% of ${(kvb.daily_writes_limit ?? 1000).toLocaleString()} / day • MTD: ${(kvb.mtd_writes ?? 0).toLocaleString()}</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(kvWritePct)}" style="width:${clampPct(kvWritePct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Daily Deletes &amp; Lists</h3>
+                                <div class="metric ${getQuotaClass(Math.max(kvDelPct, kvListPct))}">${(kvb.daily_deletes ?? 0).toLocaleString()} D / ${(kvb.daily_lists ?? 0).toLocaleString()} L</div>
+                                <div class="metric-sub">Deletes: ${kvDelPct}% • Lists: ${kvListPct}% (1,000 / day each)</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(Math.max(kvDelPct, kvListPct))}" style="width:${clampPct(Math.max(kvDelPct, kvListPct))}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Total KV Storage</h3>
+                                <div class="metric ${getQuotaClass(kvStoPct)}">${kvb.total_storage_mb ?? 0} MB</div>
+                                <div class="metric-sub">${kvStoPct}% of ${(kvb.storage_limit_mb ?? 1024).toLocaleString()} MB (1 GB) • Keys: ${(kvb.total_keys ?? 0).toLocaleString()}</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(kvStoPct)}" style="width:${clampPct(kvStoPct)}%"></div></div>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="breakdown-table">
+                                <thead>
+                                    <tr>
+                                        <th>KV Namespace</th>
+                                        <th>Reads / Writes (Today)</th>
+                                        <th>Reads (MTD)</th>
+                                        <th>Writes (MTD)</th>
+                                        <th>Deletes / Lists (MTD)</th>
+                                        <th>Keys</th>
+                                        <th>Storage</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${kvRowsHtml || '<tr><td colspan="7" style="color:#94a3b8">No Workers KV namespaces or operations detected.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                // 7. R2 Object Storage
+                const r2Container = document.getElementById('r2-container');
+                const r2b = data.r2_billing || {};
+                const r2ClassAPct = r2b.monthly_class_a_pct ?? 0;
+                const r2ClassBPct = r2b.monthly_class_b_pct ?? 0;
+                const r2StoPct = r2b.storage_pct ?? 0;
+
+                let r2RowsHtml = '';
+                (r2b.buckets || []).forEach(b => {
+                    r2RowsHtml += `
+                        <tr>
+                            <td><strong>${escapeHtml(b.name)}</strong></td>
+                            <td>${b.payload_size_mb ?? 0} MB <span style="color:#94a3b8">(+${b.metadata_size_mb ?? 0} MB meta)</span></td>
+                            <td>${(b.object_count ?? 0).toLocaleString()}</td>
+                            <td>${(b.class_a_ops_today ?? 0).toLocaleString()} A / ${(b.class_b_ops_today ?? 0).toLocaleString()} B</td>
+                            <td>${(b.class_a_ops_mtd ?? 0).toLocaleString()}</td>
+                            <td>${(b.class_b_ops_mtd ?? 0).toLocaleString()}</td>
+                            <td>${b.egress_mb_mtd ?? 0} MB <span class="tag tag-green">$0 Egress</span></td>
+                        </tr>
+                    `;
+                });
+
+                r2Container.innerHTML = `
+                    <div class="domain-section">
+                        <div class="domain-title">
+                            <span>R2 Object Storage Buckets &amp; Monthly Quotas</span>
+                            <span class="subtitle-badge">Est. Billable MTD: $${(r2b.estimated_billable_usd ?? 0).toFixed(2)}</span>
+                        </div>
+                        <div class="grid">
+                            <div class="card">
+                                <h3>Class A Operations (MTD Quota)</h3>
+                                <div class="metric ${getQuotaClass(r2ClassAPct)}">${(r2b.mtd_class_a_ops ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">${r2ClassAPct}% of ${(r2b.monthly_class_a_limit ?? 1000000).toLocaleString()} / mo free • Today: ${(r2b.daily_class_a_ops ?? 0).toLocaleString()}</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(r2ClassAPct)}" style="width:${clampPct(r2ClassAPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Class B Operations (MTD Quota)</h3>
+                                <div class="metric ${getQuotaClass(r2ClassBPct)}">${(r2b.mtd_class_b_ops ?? 0).toLocaleString()}</div>
+                                <div class="metric-sub">${r2ClassBPct}% of ${(r2b.monthly_class_b_limit ?? 10000000).toLocaleString()} / mo free • Today: ${(r2b.daily_class_b_ops ?? 0).toLocaleString()}</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(r2ClassBPct)}" style="width:${clampPct(r2ClassBPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Total R2 Object Storage</h3>
+                                <div class="metric ${getQuotaClass(r2StoPct)}">${r2b.total_storage_mb ?? 0} MB</div>
+                                <div class="metric-sub">${r2StoPct}% of ${(r2b.storage_limit_mb ?? 10000).toLocaleString()} MB (10 GB) free • Objects: ${(r2b.total_objects ?? 0).toLocaleString()}</div>
+                                <div class="progress-track"><div class="progress-bar ${getProgressClass(r2StoPct)}" style="width:${clampPct(r2StoPct)}%"></div></div>
+                            </div>
+                            <div class="card">
+                                <h3>Retrieved Data / Egress (MTD)</h3>
+                                <div class="metric status-healthy">${r2b.mtd_egress_mb ?? 0} MB</div>
+                                <div class="metric-sub">Zero Egress Fee • Free Deletes MTD: ${(r2b.mtd_free_ops ?? 0).toLocaleString()}</div>
+                            </div>
+                        </div>
+                        <div class="table-wrap">
+                            <table class="breakdown-table">
+                                <thead>
+                                    <tr>
+                                        <th>R2 Bucket</th>
+                                        <th>Storage Used</th>
+                                        <th>Objects</th>
+                                        <th>Class A / B (Today)</th>
+                                        <th>Class A Writes/Lists (MTD)</th>
+                                        <th>Class B Reads (MTD)</th>
+                                        <th>Retrieved Data (MTD)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${r2RowsHtml || '<tr><td colspan="7" style="color:#94a3b8">No R2 buckets or object storage operations detected.</td></tr>'}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                // 8. Raspberry Pi 5 (Vitals, Qdrant, Sync, Critical Services)
+                renderRpi5Section(data.rpi5);
+
+                // 9. ESP-32S Out-of-Band Watchdog (Last Section)
+                renderEsp32Section(data.esp32);
+            } catch (err) {
+                document.getElementById('daemon-health').innerText = "DISCONNECTED";
+                document.getElementById('daemon-health').className = "status-crit";
+                const domainsContainer = document.getElementById('domains-container');
+                if (!domainsContainer.innerHTML.trim()) {
+                    domainsContainer.innerHTML = '<div class="domain-section"><p class="status-crit" style="margin:0;">Unable to load metrics.json from Cloudflare Worker. Verify CLOUDFLARE_API_TOKEN is configured.</p></div>';
+                }
+            }
+        }
+
+        function renderRpi5Section(rpi5) {
+            const container = document.getElementById('rpi5-container');
+            if (!rpi5) {
+                container.innerHTML = `
+                    <div class="domain-section" style="border-color:#334155;">
+                        <div class="domain-title">
+                            <span>Raspberry Pi 5 Edge Node (15-Min Cron Agent)</span>
+                            <span class="subtitle-badge">⏳ Awaiting Initial Cron Push</span>
+                        </div>
+                        <p style="color:#94a3b8; margin:0.75rem 0 0 0;">
+                            No telemetry received yet from <code class="mono">/opt/noc-agent/rpi5_noc_reporter.py</code>.
+                            Once the 15-minute cron reporter pushes to <code class="mono">https://noc-hook.tsimon.me/api/ingest/rpi5</code>,
+                            all system vitals, Qdrant status, Brain sync state, and critical services will appear here automatically.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            const h = rpi5.host || {};
+            const c = rpi5.cpu || {};
+            const t = rpi5.thermals || {};
+            const m = rpi5.memory || {};
+            const n = rpi5.network || {};
+            const q = rpi5.qdrant || {};
+            const s = rpi5.sync || {};
+            const storage = rpi5.storage || [];
+            const services = rpi5.services || [];
+
+            const ageMin = computeAgeMinutes(rpi5.received_at_utc || rpi5.reported_at_utc);
+            const staleBadge = ageMin !== null && ageMin > 35
+                ? `<span class="tag tag-red">STALE (${ageMin}m ago)</span>`
+                : `<span class="tag tag-green">15m Cron • ${ageMin !== null ? ageMin + 'm ago' : 'Fresh'}</span>`;
+
+            const rootFs = storage.find(x => x.mountpoint === '/') || storage[0] || {};
+            const perCoreHtml = (c.per_core_pct || []).map((pct, i) =>
+                `<span class="core-pill">C${i}: <strong>${pct}%</strong></span>`
+            ).join('');
+
+            const storageRows = storage.map(fs => `
+                <tr>
+                    <td><strong class="mono">${escapeHtml(fs.mountpoint)}</strong> <span style="color:#94a3b8">(${escapeHtml(fs.device)})</span></td>
+                    <td>${escapeHtml(fs.fstype)}</td>
+                    <td>${fs.used_gb} / ${fs.total_gb} GB</td>
+                    <td>${fs.free_gb} GB</td>
+                    <td class="${getThresholdClass(fs.usage_pct, 80, 90)}"><strong>${fs.usage_pct}%</strong></td>
+                    <td>${fs.inode_usage_pct !== null && fs.inode_usage_pct !== undefined ? fs.inode_usage_pct + '%' : '--'}</td>
+                </tr>
+            `).join('');
+
+            const nicRows = (n.interfaces || []).map(nic => {
+                const stateCls = String(nic.operstate).toLowerCase() === 'up' ? 'tag-green' : 'tag-amber';
+                const wifiInfo = nic.wifi_ssid
+                    ? `${escapeHtml(nic.wifi_ssid)} (${nic.wifi_rssi_dbm ?? '?'} dBm, ${nic.wifi_freq_mhz ?? '?'} MHz)`
+                    : '--';
+                return `
+                    <tr>
+                        <td><strong class="mono">${escapeHtml(nic.name)}</strong><span class="tag ${stateCls}">${escapeHtml(nic.operstate)}</span></td>
+                        <td class="mono">${escapeHtml((nic.ipv4 || []).join(', ') || '--')}</td>
+                        <td class="mono">${escapeHtml(nic.mac || '--')}</td>
+                        <td>↓ ${nic.rx_mb ?? 0} MB / ↑ ${nic.tx_mb ?? 0} MB</td>
+                        <td>${nic.rx_errors ?? 0} / ${nic.tx_errors ?? 0} <span style="color:#64748b">(drops ${nic.rx_drops ?? 0}/${nic.tx_drops ?? 0})</span></td>
+                        <td>${wifiInfo}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const prefixTags = Object.entries(s.chunks_by_prefix || {})
+                .sort((a, b) => b[1] - a[1])
+                .map(([k, v]) => `<span class="tag">${escapeHtml(k)}: <strong>${Number(v).toLocaleString()}</strong></span>`)
+                .join('');
+
+            const activeSvcCnt = services.filter(x => x.active).length;
+            const critDownCnt = services.filter(x => x.critical && !x.active).length;
+            const svcRows = services.map(svc => {
+                const stTag = svc.active
+                    ? '<span class="tag tag-green" style="margin-left:0">ACTIVE</span>'
+                    : (svc.critical ? '<span class="tag tag-red" style="margin-left:0">CRITICAL DOWN</span>' : '<span class="tag tag-amber" style="margin-left:0">INACTIVE</span>');
+                const typeTag = svc.type === 'docker'
+                    ? '<span class="tag tag-purple">Docker</span>'
+                    : (svc.type === 'timer' ? '<span class="tag">Timer</span>' : '<span class="tag">systemd</span>');
+                return `
+                    <tr>
+                        <td><strong>${escapeHtml(svc.display_name || svc.name)}</strong>${typeTag}${svc.critical ? '<span class="tag tag-amber">Critical</span>' : ''}</td>
+                        <td>${stTag} <span class="mono" style="color:#94a3b8; margin-left:0.3rem;">${escapeHtml(svc.status)}/${escapeHtml(svc.substate)}</span></td>
+                        <td>${escapeHtml(svc.uptime_since || '--')}</td>
+                        <td class="mono">${svc.pid ?? '--'}</td>
+                        <td>${svc.rss_mb !== null && svc.rss_mb !== undefined ? svc.rss_mb + ' MB' : '--'}</td>
+                        <td>${svc.restarts ?? 0}</td>
+                        <td style="color:#94a3b8">${escapeHtml(svc.health_detail || '--')}</td>
+                    </tr>
+                `;
+            }).join('');
+
+            const qStatusCls = q.reachable && q.healthz_ok && String(q.status).toLowerCase() === 'green' ? 'status-healthy' : 'status-crit';
+            const syncCls = s.service_active && s.brain_uplink_ok ? 'status-healthy' : 'status-crit';
+
+            container.innerHTML = `
+                <div class="domain-section" style="border-color:#22c55e;">
+                    <div class="domain-title">
+                        <span>🍓 ${escapeHtml(h.hostname || 'rpi')} — ${escapeHtml(h.model || 'Raspberry Pi 5')} ${staleBadge}</span>
+                        <span class="subtitle-badge">Uptime: ${escapeHtml(h.uptime_human || '--')} • ${escapeHtml(h.os_pretty || 'Debian')} • Reported: ${escapeHtml(formatSyncTimestamp(rpi5.reported_at_utc))}</span>
+                    </div>
+
+                    <div class="subsection-title">
+                        <span>1. System Vitals (CPU, Thermals, Memory, Storage &amp; Network)</span>
+                        <span class="subtitle-badge">Kernel: ${escapeHtml(h.kernel || '--')} (${escapeHtml(h.arch || 'aarch64')}) • Primary IP: ${escapeHtml(n.primary_ip || '--')} • GW RTT: ${n.gateway_rtt_ms ?? '--'} ms</span>
+                    </div>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>CPU Utilization (${c.cores ?? 4} Cores)</h3>
+                            <div class="metric ${getThresholdClass(c.usage_pct, 80, 92)}">${c.usage_pct ?? 0}%</div>
+                            <div class="metric-sub">${c.freq_mhz ?? 0} / ${c.max_freq_mhz ?? 2400} MHz • Gov: ${escapeHtml(c.governor || '--')}</div>
+                            <div class="progress-track"><div class="progress-bar ${getProgressClass(c.usage_pct ?? 0)}" style="width:${clampPct(c.usage_pct)}%"></div></div>
+                            <div class="core-pills">${perCoreHtml}</div>
+                        </div>
+                        <div class="card">
+                            <h3>Load Average (1m / 5m / 15m)</h3>
+                            <div class="metric ${getThresholdClass(c.load_pct, 80, 95)}">${c.load_1m ?? 0} / ${c.load_5m ?? 0}</div>
+                            <div class="metric-sub">15m: ${c.load_15m ?? 0} • ${c.load_pct ?? 0}% capacity • Procs: ${h.processes_running ?? 0}/${h.processes_total ?? 0}</div>
+                            <div class="progress-track"><div class="progress-bar ${getProgressClass(c.load_pct ?? 0)}" style="width:${clampPct(c.load_pct)}%"></div></div>
+                        </div>
+                        <div class="card">
+                            <h3>Thermals, Fan &amp; Power</h3>
+                            <div class="metric ${getThresholdClass(t.soc_temp_c, 70, 80)}">${t.soc_temp_c ?? 'N/A'}°C</div>
+                            <div class="metric-sub">
+                                RP1: ${t.rp1_temp_c ?? 'N/A'}°C • Fan: <strong>${t.fan_rpm ?? 'N/A'} RPM</strong>${t.fan_pwm !== null && t.fan_pwm !== undefined ? ' (PWM ' + t.fan_pwm + ')' : ''}<br/>
+                                Core: ${t.core_volts ?? 'N/A'}V • Throttle: <strong class="${t.throttled_now ? 'status-crit' : 'status-healthy'}">${escapeHtml(t.throttled_status || 'OK (0x0)')}</strong>
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>RAM &amp; Swap Usage</h3>
+                            <div class="metric ${getThresholdClass(m.ram_usage_pct, 85, 93)}">${m.ram_usage_pct ?? 0}%</div>
+                            <div class="metric-sub">
+                                ${(m.ram_used_mb ?? 0).toLocaleString()} / ${(m.ram_total_mb ?? 0).toLocaleString()} MB (Avail: ${(m.ram_available_mb ?? 0).toLocaleString()} MB)<br/>
+                                Swap: <strong>${m.swap_usage_pct ?? 0}%</strong> (${(m.swap_used_mb ?? 0).toLocaleString()} / ${(m.swap_total_mb ?? 0).toLocaleString()} MB)
+                            </div>
+                            <div class="progress-track"><div class="progress-bar ${getProgressClass(m.ram_usage_pct ?? 0)}" style="width:${clampPct(m.ram_usage_pct)}%"></div></div>
+                        </div>
+                        <div class="card">
+                            <h3>Root Storage (/)</h3>
+                            <div class="metric ${getThresholdClass(rootFs.usage_pct, 80, 90)}">${rootFs.usage_pct ?? 0}%</div>
+                            <div class="metric-sub">${rootFs.used_gb ?? 0} / ${rootFs.total_gb ?? 0} GB (${rootFs.free_gb ?? 0} GB free)${rootFs.inode_usage_pct !== null && rootFs.inode_usage_pct !== undefined ? ' • Inodes: ' + rootFs.inode_usage_pct + '%' : ''}</div>
+                            <div class="progress-track"><div class="progress-bar ${getProgressClass(rootFs.usage_pct ?? 0)}" style="width:${clampPct(rootFs.usage_pct)}%"></div></div>
+                        </div>
+                    </div>
+
+                    <div class="subsection-title">
+                        <span>2. Qdrant Vector Database</span>
+                        <span class="subtitle-badge">Collection: ${escapeHtml(q.collection || 'knowledge_hub')} • Qdrant v${escapeHtml(q.version || '--')}</span>
+                    </div>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>Qdrant Health &amp; Status</h3>
+                            <div class="metric ${qStatusCls}">${escapeHtml((q.status || 'OFFLINE').toUpperCase())}</div>
+                            <div class="metric-sub">Healthz: ${q.healthz_ok ? '<strong class="status-healthy">PASS</strong>' : '<strong class="status-crit">FAIL</strong>'} • API RTT: <strong>${q.api_latency_ms ?? '--'} ms</strong></div>
+                        </div>
+                        <div class="card">
+                            <h3>Vectors &amp; Segments</h3>
+                            <div class="metric status-info">${(q.points_count ?? 0).toLocaleString()}</div>
+                            <div class="metric-sub">Indexed: ${(q.indexed_vectors_count ?? 0).toLocaleString()} • Segments: ${q.segments_count ?? 0} • ${q.vector_size ?? 384}d ${escapeHtml(q.distance || 'Cosine')}</div>
+                        </div>
+                        <div class="card">
+                            <h3>Optimizer &amp; Disk Footprint</h3>
+                            <div class="metric">${q.disk_usage_mb ?? 0} MB</div>
+                            <div class="metric-sub">Optimizer: <strong>${escapeHtml(q.optimizer_status || '--')}</strong> • Container RSS: ${q.container_rss_mb ?? '--'} MB</div>
+                        </div>
+                    </div>
+
+                    <div class="subsection-title">
+                        <span>3. Brain Edge Sync Status (gemini-brain-watcher → brain.tsimon.me)</span>
+                        <span class="subtitle-badge">RPI_SYNC=${s.enabled ? 'ON' : 'OFF'} • CLI_SYNC=${s.cli_sync_enabled ? 'ON' : 'OFF'} • DB: ${s.state_db_size_mb ?? 0} MB</span>
+                    </div>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>Sync Daemon &amp; Uplink</h3>
+                            <div class="metric ${syncCls}">${s.service_active ? 'ACTIVE' : 'DOWN'}</div>
+                            <div class="metric-sub">
+                                Substate: ${escapeHtml(s.service_substate || '--')} • RSS: ${s.service_rss_mb ?? '--'} MB<br/>
+                                Brain Uplink: <strong class="${s.brain_uplink_ok ? 'status-healthy' : 'status-crit'}">${s.brain_uplink_ok ? 'HTTP ' + (s.brain_uplink_http_code ?? 200) : 'FAIL'}</strong> (${s.brain_uplink_latency_ms ?? '--'} ms)
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>Total Synced Chunks (SQLite)</h3>
+                            <div class="metric status-info">${(s.total_synced_chunks ?? 0).toLocaleString()}</div>
+                            <div class="metric-sub" style="margin-top:0.45rem;">${prefixTags || 'No chunks cached yet'}</div>
+                        </div>
+                        <div class="card">
+                            <h3>Last Qdrant Federation Pass</h3>
+                            <div class="metric status-healthy">${(s.last_qdrant_scanned ?? 0).toLocaleString()}</div>
+                            <div class="metric-sub">
+                                Scanned • Newly synced: <strong>${(s.last_qdrant_newly_synced ?? 0).toLocaleString()}</strong><br/>
+                                Pass: ${escapeHtml(s.last_qdrant_pass_utc || 'N/A')}
+                            </div>
+                        </div>
+                        <div class="card">
+                            <h3>Last Chunk Sync &amp; Errors</h3>
+                            <div class="metric ${(s.recent_errors_count ?? 0) > 0 ? 'status-warn' : 'status-healthy'}">${s.recent_errors_count ?? 0} err</div>
+                            <div class="metric-sub">Last chunk: ${escapeHtml(s.last_chunk_synced_utc || 'N/A')}${s.recent_error_sample ? '<br/><span class="status-warn">' + escapeHtml(s.recent_error_sample.slice(0, 90)) + '</span>' : ''}</div>
+                        </div>
+                    </div>
+
+                    <div class="subsection-title">
+                        <span>4. Critical Services Status (${activeSvcCnt}/${services.length} Active)</span>
+                        <span class="subtitle-badge">${critDownCnt > 0 ? '🚨 ' + critDownCnt + ' Critical Service(s) Down' : '✅ All Critical Services Running'}</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="breakdown-table">
+                            <thead>
+                                <tr>
+                                    <th>Service</th>
+                                    <th>State</th>
+                                    <th>Active Since</th>
+                                    <th>PID</th>
+                                    <th>RSS Mem</th>
+                                    <th>Restarts</th>
+                                    <th>Details</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${svcRows || '<tr><td colspan="7" style="color:#94a3b8">No services reported.</td></tr>'}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="subsection-title">
+                        <span>5. Mounted Filesystems &amp; Network Interfaces</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="breakdown-table">
+                            <thead>
+                                <tr>
+                                    <th>Mountpoint</th>
+                                    <th>FS Type</th>
+                                    <th>Used / Total</th>
+                                    <th>Free</th>
+                                    <th>Usage %</th>
+                                    <th>Inodes %</th>
+                                </tr>
+                            </thead>
+                            <tbody>${storageRows || '<tr><td colspan="6" style="color:#94a3b8">No filesystems reported.</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="breakdown-table">
+                            <thead>
+                                <tr>
+                                    <th>Interface</th>
+                                    <th>IPv4 Address</th>
+                                    <th>MAC</th>
+                                    <th>Traffic (RX / TX)</th>
+                                    <th>Errors / Drops</th>
+                                    <th>Wi-Fi Link</th>
+                                </tr>
+                            </thead>
+                            <tbody>${nicRows || '<tr><td colspan="6" style="color:#94a3b8">No network interfaces reported.</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderEsp32Section(esp32) {
+            const container = document.getElementById('esp32-container');
+            if (!esp32) {
+                container.innerHTML = `
+                    <div class="domain-section" style="border-color:#334155;">
+                        <div class="domain-title">
+                            <span>📡 ESP-32S Out-of-Band Hardware Watchdog</span>
+                            <span class="subtitle-badge">⏳ Awaiting Initial Ping Probe / Heartbeat</span>
+                        </div>
+                        <p style="color:#94a3b8; margin:0.75rem 0 0 0;">
+                            Waiting for the Raspberry Pi 5 cron probe (ICMP ping, RTT, jitter, packet loss, MAC/ARP)
+                            or direct ESP-32S heartbeat push to <code class="mono">https://noc-hook.tsimon.me/api/ingest/esp32</code>.
+                        </p>
+                    </div>
+                `;
+                return;
+            }
+
+            const p = esp32.ping || {};
+            const d = esp32.device || null;
+            const oob = esp32.oob_watchdog || null;
+            const h = esp32.history || null;
+
+            const isOnline = p.reachable !== false;
+            const statusCls = isOnline ? 'status-healthy' : 'status-crit';
+            const borderCol = isOnline ? '#38bdf8' : '#ef4444';
+
+            // Sparkline bars for last 24h ping samples
+            let sparkHtml = '';
+            if (h && Array.isArray(h.recent_samples) && h.recent_samples.length > 0) {
+                const maxRtt = Math.max(50, ...h.recent_samples.map(s => Number(s.rtt_ms || 0)));
+                const bars = h.recent_samples.slice(-36).map(s => {
+                    if (!s.ok) {
+                        return `<div class="spark-bar bg-crit" style="height:100%" title="${escapeHtml(s.ts_utc)}: OFFLINE (100% loss)"></div>`;
+                    }
+                    const rtt = Number(s.rtt_ms || 1);
+                    const hPct = Math.max(18, Math.min(100, Math.round((rtt / maxRtt) * 100)));
+                    const cls = rtt >= 400 ? 'bg-crit' : (rtt >= 150 ? 'bg-warn' : 'bg-healthy');
+                    return `<div class="spark-bar ${cls}" style="height:${hPct}%" title="${escapeHtml(s.ts_utc)}: ${rtt} ms (${s.loss_pct}% loss)"></div>`;
+                }).join('');
+                sparkHtml = `<div class="sparkline">${bars}</div>`;
+            }
+
+            let deviceCardsHtml = '';
+            if (d) {
+                const rssiCls = d.wifi_rssi_dbm <= -78 ? 'status-warn' : 'status-healthy';
+                const heapCls = d.free_heap_kb < 40 ? 'status-warn' : 'status-healthy';
+                const heapUsedPct = d.total_heap_kb > 0 ? Math.round(((d.total_heap_kb - d.free_heap_kb) / d.total_heap_kb) * 100) : 0;
+                deviceCardsHtml = `
+                    <div class="subsection-title">
+                        <span>ESP-32S Hardware, Wi-Fi Radio &amp; Watchdog Telemetry</span>
+                        <span class="subtitle-badge">FW ${escapeHtml(d.firmware_version)} • ${escapeHtml(d.chip_model)} @ ${d.cpu_freq_mhz} MHz • Flash ${d.flash_size_mb} MB</span>
+                    </div>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>Device Uptime &amp; Reset Reason</h3>
+                            <div class="metric status-healthy">${escapeHtml(d.uptime_human || '--')}</div>
+                            <div class="metric-sub">Reset: <strong class="mono">${escapeHtml(d.reset_reason || 'UNKNOWN')}</strong>${d.internal_temp_c !== null && d.internal_temp_c !== undefined ? ' • Temp: ' + d.internal_temp_c + '°C' : ''}</div>
+                        </div>
+                        <div class="card">
+                            <h3>Wi-Fi Signal (RSSI)</h3>
+                            <div class="metric ${rssiCls}">${d.wifi_rssi_dbm ?? '--'} dBm</div>
+                            <div class="metric-sub">${escapeHtml(d.wifi_ssid || '--')} (Ch ${d.wifi_channel ?? '--'}) • Quality: ${d.wifi_signal_pct ?? 0}% • Reconnects: ${d.wifi_reconnects ?? 0}</div>
+                            <div class="progress-track"><div class="progress-bar ${d.wifi_rssi_dbm <= -78 ? 'bg-warn' : 'bg-healthy'}" style="width:${clampPct(d.wifi_signal_pct)}%"></div></div>
+                        </div>
+                        <div class="card">
+                            <h3>SRAM Free Heap</h3>
+                            <div class="metric ${heapCls}">${d.free_heap_kb ?? 0} KB</div>
+                            <div class="metric-sub">Total: ${d.total_heap_kb ?? 0} KB • Min: ${d.min_free_heap_kb ?? 0} KB • MaxBlk: ${d.max_alloc_heap_kb ?? 0} KB • Frag: ${d.heap_frag_pct ?? 0}%</div>
+                            <div class="progress-track"><div class="progress-bar ${getProgressClass(heapUsedPct)}" style="width:${clampPct(heapUsedPct)}%"></div></div>
+                        </div>
+                        <div class="card">
+                            <h3>OOB Watchdog Activity</h3>
+                            <div class="metric status-info">${(d.poll_cycles ?? 0).toLocaleString()}</div>
+                            <div class="metric-sub">Poll cycles • Probe Fails: <strong>${(d.total_probe_failures ?? 0).toLocaleString()}</strong> • OOB Alerts: ${(d.telegram_alerts_sent ?? 0).toLocaleString()}</div>
+                        </div>
+                    </div>
+                `;
+            } else {
+                deviceCardsHtml = `
+                    <div style="margin-top:1rem; padding:0.75rem 0.95rem; background:#0b1329; border:1px dashed #334155; border-radius:8px; font-size:0.84rem; color:#94a3b8;">
+                        💡 <strong>Deep Device Telemetry Ready:</strong> Ping, latency, jitter, packet loss, MAC/ARP, and 24h availability are active now via RPi5 LAN probing.
+                        Flash the updated <code class="mono">esp32-monitor</code> firmware to unlock live <strong>Wi-Fi RSSI, SRAM heap, uptime, reset reason, internal temp, Cloudflare Global Statuspage, and all 4 OOB endpoint probe latencies</strong>.
+                    </div>
+                `;
+            }
+
+            let oobHtml = '';
+            if (oob) {
+                const cfIndCls = oob.cf_global_indicator === 'none' ? 'tag-green' : 'tag-red';
+                const epRows = (oob.endpoints || []).map(ep => {
+                    const epTag = ep.state === 'UP'
+                        ? '<span class="tag tag-green" style="margin-left:0">UP</span>'
+                        : (ep.state === 'SLOW' ? '<span class="tag tag-amber" style="margin-left:0">SLOW</span>' : '<span class="tag tag-red" style="margin-left:0">' + escapeHtml(ep.state) + '</span>');
+                    return `
+                        <tr>
+                            <td><strong>${escapeHtml(ep.name)}</strong></td>
+                            <td class="mono" style="color:#94a3b8">${escapeHtml(ep.url)}</td>
+                            <td>${epTag}</td>
+                            <td class="mono">${ep.http_code ?? '--'}</td>
+                            <td><strong>${ep.latency_ms ?? 0} ms</strong></td>
+                            <td>${ep.consecutive_passes ?? 0} ok / ${ep.consecutive_fails ?? 0} fail</td>
+                            <td style="color:#94a3b8">${escapeHtml(ep.last_error || '--')}</td>
+                        </tr>
+                    `;
+                }).join('');
+
+                oobHtml = `
+                    <div class="subsection-title">
+                        <span>ESP-32S Out-of-Band Cloudflare Probe Matrix</span>
+                        <span class="subtitle-badge">CF Global Statuspage: <span class="tag ${cfIndCls}">${escapeHtml((oob.cf_global_indicator || 'unknown').toUpperCase())}</span> ${escapeHtml(oob.cf_global_description || '')}</span>
+                    </div>
+                    <div class="table-wrap">
+                        <table class="breakdown-table">
+                            <thead>
+                                <tr>
+                                    <th>Target</th>
+                                    <th>Endpoint URL</th>
+                                    <th>OOB State</th>
+                                    <th>HTTP</th>
+                                    <th>Latency</th>
+                                    <th>Hysteresis Streak</th>
+                                    <th>Last Error</th>
+                                </tr>
+                            </thead>
+                            <tbody>${epRows || '<tr><td colspan="7" style="color:#94a3b8">No OOB probes reported yet.</td></tr>'}</tbody>
+                        </table>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = `
+                <div class="domain-section" style="border-color:${borderCol};">
+                    <div class="domain-title">
+                        <span>📡 NodeMCU ESP-32S Watchdog (${escapeHtml(p.target_ip || d?.wifi_ip || '--')})</span>
+                        <span class="subtitle-badge">MAC: ${escapeHtml(p.mac || d?.wifi_mac || '--')} (${escapeHtml(p.vendor || 'Espressif Inc.')}) • Updated: ${escapeHtml(formatSyncTimestamp(esp32.last_updated_utc))}</span>
+                    </div>
+                    <div class="grid">
+                        <div class="card">
+                            <h3>ICMP Ping Status</h3>
+                            <div class="metric ${statusCls}">${isOnline ? 'ONLINE' : 'OFFLINE'}</div>
+                            <div class="metric-sub">ARP: <strong class="mono">${escapeHtml(p.arp_state || '--')}</strong> via <span class="mono">${escapeHtml(p.interface || 'eth0')}</span> • TTL: ${p.ttl ?? '--'}</div>
+                        </div>
+                        <div class="card">
+                            <h3>Ping Latency (Avg RTT)</h3>
+                            <div class="metric ${getThresholdClass(p.rtt_avg_ms, 150, 400)}">${p.rtt_avg_ms !== null && p.rtt_avg_ms !== undefined ? p.rtt_avg_ms + ' ms' : 'N/A'}</div>
+                            <div class="metric-sub">Min: ${p.rtt_min_ms ?? '--'} ms • Max: ${p.rtt_max_ms ?? '--'} ms • Jitter: <strong>${p.rtt_jitter_ms ?? '--'} ms</strong></div>
+                        </div>
+                        <div class="card">
+                            <h3>Packet Loss</h3>
+                            <div class="metric ${getThresholdClass(p.packet_loss_pct, 20, 60)}">${p.packet_loss_pct ?? 0}%</div>
+                            <div class="metric-sub">${p.packets_received ?? 0} / ${p.packets_sent ?? 5} packets received • Probed from <span class="mono">${escapeHtml(p.probed_from || 'rpi')}</span></div>
+                            <div class="progress-track"><div class="progress-bar ${getProgressClass(p.packet_loss_pct ?? 0)}" style="width:${clampPct(p.packet_loss_pct)}%"></div></div>
+                        </div>
+                        <div class="card">
+                            <h3>24h Availability &amp; Trend</h3>
+                            <div class="metric ${h && h.uptime_pct_24h < 95 ? 'status-warn' : 'status-healthy'}">${h ? h.uptime_pct_24h + '%' : '--'}</div>
+                            <div class="metric-sub">${h ? h.samples_24h + ' samples • 24h Avg: ' + (h.avg_rtt_24h_ms ?? '--') + ' ms • Streak: ' + (h.consecutive_failures > 0 ? h.consecutive_failures + ' fails' : h.consecutive_successes + ' ok') : 'Collecting baseline...'}</div>
+                            ${sparkHtml}
+                        </div>
+                    </div>
+                    ${deviceCardsHtml}
+                    ${oobHtml}
+                </div>
+            `;
+        }
+
+        function renderAiSection(aiData) {
+            const aiContainer = document.getElementById('gemma-ai-container');
+            const aiStatus = aiData.overall_status || 'HEALTHY';
+            const aiStatusClass = aiStatus === 'CRITICAL' ? 'status-crit' : (aiStatus === 'WARNING' ? 'status-warn' : 'status-healthy');
+            const aiStatusTagCls = aiStatus === 'CRITICAL' ? 'tag-red' : (aiStatus === 'WARNING' ? 'tag-amber' : 'tag-green');
+            const aiAnomalies = aiData.anomalies || [];
+            const aiSnoozed = aiData.snoozed_anomalies || [];
+
+            let anomaliesHtml = '';
+            if (aiAnomalies.length > 0) {
+                const bulkBtnHtml = aiAnomalies.length > 1
+                    ? `<div style="display:flex; justify-content:flex-end; gap:0.35rem; margin-bottom:0.2rem;">
+                        <button class="snooze-btn" onclick="snoozeAssessment('all', '24h')">💤 Snooze All (24h)</button>
+                        <button class="snooze-btn" onclick="snoozeAssessment('all', '72h')">All (72h)</button>
+                        <button class="snooze-btn" onclick="snoozeAssessment('all', '7d')">All (7d)</button>
+                       </div>`
+                    : '';
+
+                anomaliesHtml = '<div style="margin-top:0.85rem; display:flex; flex-direction:column; gap:0.45rem;">' +
+                    bulkBtnHtml +
+                    aiAnomalies.map(a => {
+                        const tagCls = a.severity === 'CRITICAL' ? 'tag-red' : 'tag-amber';
+                        return `<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; background:#0b1329; padding:0.45rem 0.65rem; border-radius:6px; border:1px solid #1e293b;">
+                            <div>
+                                <span class="tag ${tagCls}" style="margin-left:0">${escapeHtml(a.severity)}</span>
+                                <span class="tag">${escapeHtml(a.category || 'NOC')}</span>
+                                <strong>${escapeHtml(a.title)}</strong>
+                                <span style="color:#94a3b8">— ${escapeHtml(a.detail)}</span>
+                            </div>
+                            <div style="display:flex; gap:0.25rem; align-items:center;">
+                                <span style="font-size:0.75rem; color:#64748b; margin-right:0.2rem;">Snooze:</span>
+                                <button class="snooze-btn" onclick="snoozeAssessment('${escapeHtml(a.key)}', '24h')" title="Snooze for 24 hours">24h</button>
+                                <button class="snooze-btn" onclick="snoozeAssessment('${escapeHtml(a.key)}', '72h')" title="Snooze for 72 hours">72h</button>
+                                <button class="snooze-btn" onclick="snoozeAssessment('${escapeHtml(a.key)}', '7d')" title="Snooze for 7 days">7d</button>
+                            </div>
+                        </div>`;
+                    }).join('') +
+                    '</div>';
+            }
+
+            let snoozedHtml = '';
+            if (aiSnoozed.length > 0) {
+                snoozedHtml = '<div style="margin-top:0.85rem; background:#0b1329; border:1px dashed #334155; border-radius:6px; padding:0.6rem 0.75rem;">' +
+                    `<div style="font-size:0.8rem; font-weight:600; color:#94a3b8; margin-bottom:0.45rem; display:flex; justify-content:space-between; align-items:center;">` +
+                    `<span>💤 Snoozed Assessments (${aiSnoozed.length}) — Muted in AI &amp; Telegram Alerts</span>` +
+                    `<button class="unsnooze-btn" onclick="unsnoozeAssessment('all')" style="font-size:0.7rem; padding:0.1rem 0.4rem;">Unsnooze All</button>` +
+                    `</div>` +
+                    '<div style="display:flex; flex-direction:column; gap:0.35rem;">' +
+                    aiSnoozed.map(s => `
+                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; font-size:0.85rem;">
+                            <div>
+                                <span class="tag" style="background:#1e293b; color:#38bdf8; border:1px solid #0284c7; margin-left:0;">💤 ${escapeHtml(s.duration_str || '24h')}</span>
+                                <strong>${escapeHtml(s.title)}</strong>
+                                <span style="color:#64748b;">— ${escapeHtml(s.detail || '')}</span>
+                                <span style="color:#94a3b8; font-size:0.75rem;">(${escapeHtml(s.remaining_human || '')} left • expires ${escapeHtml(s.snoozed_until_utc || '')})</span>
+                            </div>
+                            <button class="unsnooze-btn" onclick="unsnoozeAssessment('${escapeHtml(s.key)}')" title="Reactivate this assessment">Unsnooze</button>
+                        </div>
+                    `).join('') +
+                    '</div></div>';
+            }
+
+            const existingQuestionVal = document.getElementById('ask-noc-input')?.value || '';
+
+            const findingsCount = aiData.anomalies_count ?? 0;
+            const statusSummaryLabel = findingsCount > 0
+                ? `${aiStatus} • ${findingsCount} finding${findingsCount === 1 ? '' : 's'}`
+                : aiStatus;
+
+            aiContainer.innerHTML = `
+                <div id="ai-analyst-section" class="domain-section ai-analyst-collapsible" style="border-color:#38bdf8;">
+                    <button type="button" id="ai-analyst-toggle" class="ai-analyst-toggle-header" onclick="toggleAiAnalyst()" aria-expanded="${aiAnalystExpanded}" aria-controls="ai-analyst-body">
+                        <span class="ai-analyst-title-group">
+                            <span class="ai-analyst-title-text">🤖 Workers AI Autonomous NOC Analyst</span>
+                            <span class="tag ${aiStatusTagCls}" style="margin-left:0;">${escapeHtml(statusSummaryLabel)}</span>
+                            ${aiSnoozed.length ? `<span class="tag" style="margin-left:0;">💤 ${aiSnoozed.length} snoozed</span>` : ''}
+                        </span>
+                        <span class="ai-analyst-header-right">
+                            <span class="subtitle-badge ai-analyst-meta-badge">${escapeHtml(aiData.model || '@cf/google/gemma-3-12b-it')} | Last Check: ${escapeHtml(aiData.last_analyzed_utc || '--')} (${aiData.inference_duration_sec ?? 0}s)</span>
+                            <span id="ai-analyst-chevron" class="assessment-chevron">${aiAnalystExpanded ? '▾ Collapse' : '▸ Expand'}</span>
+                        </span>
+                    </button>
+                    <div id="ai-analyst-body" class="ai-analyst-body ${aiAnalystExpanded ? '' : 'folded'}">
+                        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                            <div class="card">
+                                <h3>AI Monitor Verdict</h3>
+                                <div class="metric ${aiStatusClass}">${escapeHtml(aiStatus)}</div>
+                                <div class="metric-sub">${findingsCount} active finding(s)${aiSnoozed.length ? ' • ' + aiSnoozed.length + ' snoozed' : ''} • Trigger: <strong>${escapeHtml(aiData.reason_code || 'SCHEDULED')}</strong></div>
+                            </div>
+                            <div class="card">
+                                <h3>Inference &amp; Policy Engine</h3>
+                                <div class="metric" style="font-size:1.1rem; color:#38bdf8;">Cloudflare Workers AI</div>
+                                <div class="metric-sub">Strict 5xx Rule: ≥100/hr × 2h • D1/DO Read Cap: 50B/mo • Telegram Alerts Enabled</div>
+                            </div>
+                            <div class="card">
+                                <h3>Schedule &amp; Edge Fleet</h3>
+                                <div class="metric" style="font-size:1.1rem; color:#c084fc;">Every 15m (CF + RPi5 Cron)</div>
+                                <div class="metric-sub">Singleton Durable Object (SQLite) • Cloudflare + RPi5 + ESP-32S Watchdog</div>
+                            </div>
+                        </div>
+                        ${anomaliesHtml}
+                        ${snoozedHtml}
+
+                        <!-- Foldable Autonomous NOC Assessment Section -->
+                        <div class="assessment-collapsible">
+                            <button type="button" id="noc-assessment-toggle" class="assessment-toggle-header" onclick="toggleNocAssessment()" aria-expanded="${assessmentExpanded}" aria-controls="noc-assessment-body">
+                                <span class="assessment-toggle-title">
+                                    <span>🧠 Autonomous NOC Assessment</span>
+                                    <span class="tag ${aiStatusTagCls}" style="margin-left:0;">${escapeHtml(aiStatus)}</span>
+                                    <span style="font-weight:400; text-transform:none; letter-spacing:0; color:#94a3b8; font-size:0.78rem;">Click to view AI briefing &amp; Ask AI Analyst</span>
+                                </span>
+                                <span id="noc-assessment-chevron" class="assessment-chevron">${assessmentExpanded ? '▾ Collapse' : '▸ Expand'}</span>
+                            </button>
+                            <div id="noc-assessment-body" class="assessment-body ${assessmentExpanded ? '' : 'folded'}">
+                                <div style="white-space:pre-wrap; font-size:0.9rem; line-height:1.55; color:#e2e8f0;">${formatAiMarkdown(aiData.analysis || 'Waiting for next Workers AI evaluation cycle...')}</div>
+                                <form class="ask-bar" onsubmit="askAiAnalyst(event)">
+                                    <input id="ask-noc-input" class="ask-input" type="text" placeholder="Ask AI Analyst about Cloudflare zones, 5xx errors, quotas, Raspberry Pi 5, Qdrant, Brain sync, or ESP-32S..." value="${escapeHtml(existingQuestionVal)}" />
+                                    <button id="btn-ask-ai" type="submit" class="action-btn">💬 Ask AI Analyst</button>
+                                </form>
+                                <div id="ask-ai-reply-box">${lastAskReplyHtml}</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        async function manualRefreshTelemetry() {
+            const btn = document.getElementById('btn-refresh');
+            if (btn) { btn.disabled = true; btn.innerText = '⏳ Refreshing...'; }
+            try {
+                await updateDashboard(true);
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = '🔄 Refresh Telemetry'; }
+            }
+        }
+
+        async function triggerManualAnalysis() {
+            const btn = document.getElementById('btn-analyze');
+            if (btn) { btn.disabled = true; btn.innerText = '⏳ Running Workers AI...'; }
+            try {
+                const resp = await fetch('/api/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ refreshMetrics: true }),
+                });
+                const data = await resp.json().catch(() => ({}));
+                if (resp.ok && data.ok) {
+                    await updateDashboard(false);
+                } else {
+                    alert('Analysis failed: ' + (data.error || resp.statusText));
+                }
+            } catch (e) {
+                alert('Could not reach /api/analyze: ' + e.message);
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = '🤖 Run AI Analysis'; }
+            }
+        }
+
+        async function sendTelegramTest() {
+            const btn = document.getElementById('btn-tg-test');
+            if (btn) { btn.disabled = true; btn.innerText = '⏳ Sending...'; }
+            try {
+                const resp = await fetch('/api/telegram/test', { method: 'POST' });
+                const data = await resp.json().catch(() => ({}));
+                if (resp.ok && data.ok) {
+                    alert('✅ Test Telegram alert delivered successfully!');
+                } else {
+                    alert('Telegram test failed: ' + (data.error || resp.statusText));
+                }
+            } catch (e) {
+                alert('Could not reach /api/telegram/test: ' + e.message);
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = '📨 Test Telegram'; }
+            }
+        }
+
+        async function setupTelegramBot() {
+            const btn = document.getElementById('btn-tg-setup');
+            if (btn) { btn.disabled = true; btn.innerText = '⏳ Registering...'; }
+            try {
+                const resp = await fetch('/api/telegram/setup', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: '{}' });
+                const data = await resp.json().catch(() => ({}));
+                if (resp.ok && data.ok) {
+                    const botName = data.botInfo?.username ? '@' + data.botInfo.username : 'Bot';
+                    alert(`✅ ${botName} webhook registered at ${data.webhookUrl} + all 23 slash commands synced!`);
+                    await updateDashboard(false);
+                } else {
+                    alert('Webhook setup failed: ' + (data.webhookRes?.description || data.error || resp.statusText));
+                }
+            } catch (e) {
+                alert('Could not reach /api/telegram/setup: ' + e.message);
+            } finally {
+                if (btn) { btn.disabled = false; btn.innerText = '🔗 Sync Bot Webhook'; }
+            }
+        }
+
+        async function askAiAnalyst(event) {
+            event.preventDefault();
+            const input = document.getElementById('ask-noc-input');
+            const btn = document.getElementById('btn-ask-ai');
+            const replyBox = document.getElementById('ask-ai-reply-box');
+            const question = (input?.value || '').trim();
+            if (!question) return;
+
+            if (btn) { btn.disabled = true; btn.innerText = '⏳ Thinking...'; }
+            if (replyBox) {
+                replyBox.innerHTML = `<div style="margin-top:0.75rem; padding:0.65rem 0.85rem; background:#0b1329; border:1px solid #1e3a5f; border-radius:6px; color:#94a3b8; font-size:0.86rem;">⏳ Workers AI is analyzing live Cloudflare, RPi5 &amp; ESP-32S telemetry...</div>`;
+            }
+
+            try {
+                const resp = await fetch('/api/ask', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ question }),
+                });
+                const data = await resp.json().catch(() => ({}));
+                if (resp.ok && data.ok) {
+                    lastAskReplyHtml = `
+                        <div style="margin-top:0.75rem; padding:0.75rem 0.9rem; background:#0b1329; border:1px solid #0284c7; border-radius:6px; font-size:0.88rem; line-height:1.5;">
+                            <div style="font-size:0.76rem; color:#38bdf8; margin-bottom:0.35rem; display:flex; justify-content:space-between;">
+                                <span><strong>Q:</strong> ${escapeHtml(question)}</span>
+                                <span>${escapeHtml(data.model || 'Workers AI')} (${data.elapsed_sec ?? 0}s)</span>
+                            </div>
+                            <div style="white-space:pre-wrap; color:#f8fafc;">${formatAiMarkdown(data.answer || '')}</div>
+                        </div>
+                    `;
+                } else {
+                    lastAskReplyHtml = `<div style="margin-top:0.75rem; color:#f87171; font-size:0.85rem;">Error: ${escapeHtml(data.error || resp.statusText)}</div>`;
+                }
+            } catch (e) {
+                lastAskReplyHtml = `<div style="margin-top:0.75rem; color:#f87171; font-size:0.85rem;">Error: ${escapeHtml(e.message)}</div>`;
+            } finally {
+                if (replyBox) replyBox.innerHTML = lastAskReplyHtml;
+                if (btn) { btn.disabled = false; btn.innerText = '💬 Ask AI Analyst'; }
+            }
+        }
+
+        async function snoozeAssessment(key, duration) {
+            try {
+                const resp = await fetch('/api/snooze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key, duration }),
+                });
+                const data = await resp.json().catch(() => ({}));
+                if (resp.ok && data.ok) {
+                    await updateDashboard(false);
+                } else {
+                    alert('Snooze failed: ' + (data.error || resp.statusText));
+                }
+            } catch (e) {
+                alert('Could not reach Snooze API (/api/snooze): ' + e.message);
+            }
+        }
+
+        async function unsnoozeAssessment(key) {
+            try {
+                const resp = await fetch('/api/unsnooze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ key }),
+                });
+                const data = await resp.json().catch(() => ({}));
+                if (resp.ok && data.ok) {
+                    await updateDashboard(false);
+                } else {
+                    alert('Unsnooze failed: ' + (data.error || resp.statusText));
+                }
+            } catch (e) {
+                alert('Could not reach Unsnooze API (/api/unsnooze): ' + e.message);
+            }
+        }
+
+        function updateActiveNavPill() {
+            const sectionIds = [
+                'sec-gemma-ai',
+                'sec-edge-domains',
+                'sec-cloud-billing',
+                'sec-durable-objects',
+                'sec-workers-ai',
+                'sec-d1-databases',
+                'sec-kv-storage',
+                'sec-r2-storage',
+                'sec-rpi5',
+                'sec-esp32'
+            ];
+            let currentId = sectionIds[0];
+            const threshold = 140;
+            for (const id of sectionIds) {
+                const el = document.getElementById(id);
+                if (el) {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top <= threshold) {
+                        currentId = id;
+                    }
+                }
+            }
+            let activeLabel = '';
+            document.querySelectorAll('.nav-pills .nav-pill').forEach(pill => {
+                const isActive = pill.getAttribute('href') === '#' + currentId;
+                pill.classList.toggle('active', isActive);
+                if (isActive) {
+                    activeLabel = (pill.textContent || '').trim();
+                }
+            });
+            const currentBadge = document.getElementById('mobile-nav-current');
+            if (currentBadge && activeLabel) {
+                currentBadge.textContent = activeLabel;
+            }
+            if (mobileNavExpanded && isMobileViewport()) {
+                fitMobileNavToViewport();
+            }
+        }
+
+        function handleViewportChange() {
+            if (!isMobileViewport() && mobileNavExpanded) {
+                setMobileNavExpanded(false);
+            } else if (mobileNavExpanded) {
+                fitMobileNavToViewport();
+            }
+        }
+
+        function initNavigationControls() {
+            document.querySelectorAll('#nav-pills-list .nav-pill').forEach(pill => {
+                pill.addEventListener('click', () => {
+                    const label = (pill.textContent || '').trim();
+                    const currentBadge = document.getElementById('mobile-nav-current');
+                    if (currentBadge && label) currentBadge.textContent = label;
+                    if (isMobileViewport() && mobileNavExpanded) {
+                        setMobileNavExpanded(false);
+                    }
+                });
+            });
+
+            document.addEventListener('click', (event) => {
+                if (!mobileNavExpanded || !isMobileViewport()) return;
+                const nav = document.getElementById('noc-nav');
+                if (nav && typeof nav.contains === 'function' && !nav.contains(event.target)) {
+                    setMobileNavExpanded(false);
+                }
+            });
+
+            document.addEventListener('keydown', (event) => {
+                if (event.key === 'Escape' && mobileNavExpanded) {
+                    setMobileNavExpanded(false);
+                }
+            });
+
+            window.addEventListener('resize', handleViewportChange, { passive: true });
+            window.addEventListener('orientationchange', handleViewportChange, { passive: true });
+        }
+
+        initNavigationControls();
+        window.addEventListener('scroll', updateActiveNavPill, { passive: true });
+        setInterval(() => updateDashboard(false), 30000);
+        updateDashboard(false).then(updateActiveNavPill);
+    </script>
+</body>
+</html>

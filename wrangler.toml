@@ -1,0 +1,70 @@
+name = "cloudflare-noc-monitor"
+main = "src/index.ts"
+compatibility_date = "2025-03-01"
+workers_dev = false
+
+# Custom Subdomain Routes (Wrangler-managed Custom Worker Domains per ADR-03)
+# - noc.tsimon.me      -> Protected by Cloudflare Zero Trust Access (Dashboard + Operator APIs)
+# - noc-hook.tsimon.me -> Strictly locked to secret-authenticated M2M routes (/api/telegram/webhook, /api/ingest/*, /health)
+routes = [
+  { pattern = "noc.tsimon.me", custom_domain = true },
+  { pattern = "noc-hook.tsimon.me", custom_domain = true }
+]
+
+# Serve the glassmorphic NOC dashboard (index.html & favicon.svg) via Workers Static Assets
+# run_worker_first = true ensures host-based isolation blocks static HTML on noc-hook.tsimon.me
+[assets]
+directory = "./public"
+binding = "ASSETS"
+run_worker_first = true
+
+# Autonomous 15-minute NOC telemetry collection, deterministic anomaly evaluation, Workers AI & Telegram alerting
+[triggers]
+crons = ["*/15 * * * *"]
+
+# Native Cloudflare Workers AI binding for autonomous NOC assessments & interactive Q&A
+[ai]
+binding = "AI"
+
+# Singleton SQLite-backed Durable Object for atomic metrics cache, RPi5/ESP-32S state, AI verdicts, Telegram & snooze state
+[durable_objects]
+bindings = [
+  { name = "NOC_MONITOR_DO", class_name = "NocMonitorDO" }
+]
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["NocMonitorDO"]
+
+[vars]
+CLOUDFLARE_ACCOUNT_ID = "70f73cd2a15a31eba64e1aa860d47614"
+# Zone IDs: tsimon.me, minkalab.net, tsimon.app, boliviaremote.work
+CF_ZONE_ID_1 = "1a8061589136edc7442d00b5ca98610a"
+CF_ZONE_ID_2 = "e2f2f9d07dc35ce362e42c14af438ec5"
+CF_ZONE_ID_3 = "a4b5db9d7286d2b9355b1e58a44861f5"
+CF_ZONE_ID_4 = "6d8621601152ad18ca7ca14a5c19cf14"
+
+# Workers AI models (primary + automatic fallback)
+AI_MODEL = "@cf/google/gemma-3-12b-it"
+AI_FALLBACK_MODEL = "@cf/meta/llama-3.1-8b-instruct-fast"
+
+# Stale-While-Revalidate cache TTL (seconds) when dashboard polls /metrics.json
+METRICS_TTL_SECONDS = "60"
+
+# Public Dashboard & Dedicated M2M Webhook Host
+NOC_DASHBOARD_URL = "https://noc.tsimon.me/"
+NOC_WEBHOOK_HOST = "noc-hook.tsimon.me"
+
+# Telegram alert reminder cooldown (seconds, default 4h = 14400)
+TELEGRAM_ALERT_COOLDOWN_SEC = "14400"
+
+# Optional Defense-in-Depth Cloudflare Access JWT verification at Worker edge:
+CF_ACCESS_TEAM_DOMAIN = ""
+CF_ACCESS_AUD = ""
+
+# Required Secrets (set via CLI, never committed in plaintext):
+#   npx wrangler secret put CLOUDFLARE_API_TOKEN
+#   npx wrangler secret put NOC_INGEST_TOKEN
+#   npx wrangler secret put TELEGRAM_BOT_TOKEN
+#   npx wrangler secret put TELEGRAM_CHAT_ID
+#   npx wrangler secret put TELEGRAM_WEBHOOK_SECRET

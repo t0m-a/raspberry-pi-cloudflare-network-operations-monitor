@@ -1,195 +1,104 @@
-![Edge RAG Hub Banner](https://tsimon.me/edge-lab-logo.png)
+<div align="center">
 
+<img src="public/favicon.svg" alt="Cloudflare NOC Logo" width="92" height="92" />
 
-# Raspberry Pi 5 — Cloudflare Edge & Local LAN NOC Monitor (Gemma 4 AI Edition)
+# ☁️ Cloudflare, Raspberry Pi 5 & ESP-32S Network Operations Center (NOC)
 
-[![Platform](https://img.shields.io/badge/Hardware-Raspberry_Pi_5_(ARM64)-C51A4A?style=flat-square&logo=raspberry-pi&logoColor=white)](#)
-[![Edge Security](https://img.shields.io/badge/Zero_Trust-Cloudflare_Tunnels-F38020?style=flat-square&logo=cloudflare&logoColor=white)](#)
-[![AI Engine](https://img.shields.io/badge/Edge_AI-Gemma_4_(Ollama)-4285F4?style=flat-square&logo=google&logoColor=white)](#)
-[![Alerting](https://img.shields.io/badge/Notifications-Telegram_Bot_API-26A5E4?style=flat-square&logo=telegram&logoColor=white)](#)
-[![Python](https://img.shields.io/badge/Python-3.11%2B-3776AB?style=flat-square&logo=python&logoColor=white)](#)
+**Self-Contained Real-Time Cloudflare Multi-Zone Edge, Serverless Quotas, Raspberry Pi 5 (Vitals, Qdrant, Brain Sync & Critical Services), ESP-32S Out-of-Band Watchdog, Autonomous Workers AI & Exhaustive Telegram Bot Platform**
 
-> **A sovereign, 24/7 Network Operations Center (NOC) observability and AI diagnostics daemon engineered for Raspberry Pi 5.** Monitors local host vitals, internal LAN endpoints, and Cloudflare Zero-Trust edge infrastructure—synthesizing anomalies through local **Gemma 4** inference and dispatching actionable incident briefs via **Telegram**.
+[![Runtime: Cloudflare Workers](https://img.shields.io/badge/Runtime-Cloudflare%20Workers%20(TypeScript)-F38020?style=for-the-badge&logo=cloudflare&logoColor=white)](https://developers.cloudflare.com/workers/)
+[![State: Durable Objects SQLite](https://img.shields.io/badge/State-Durable%20Objects%20(SQLite)-F59E0B?style=for-the-badge&logo=sqlite&logoColor=white)](https://developers.cloudflare.com/durable-objects/)
+[![AI Engine: Workers AI](https://img.shields.io/badge/AI%20Analyst-Cloudflare%20Workers%20AI%20(Gemma%203%20%2F%20Llama%203.1)-8E75B2?style=for-the-badge&logo=googlegemini&logoColor=white)](https://developers.cloudflare.com/workers-ai/)
+[![Edge Node: Raspberry Pi 5](https://img.shields.io/badge/Edge%20Node-Raspberry%20Pi%205%20(15m%20Cron)-C51A4A?style=for-the-badge&logo=raspberrypi&logoColor=white)](#)
+[![Alerting: Telegram Bot](https://img.shields.io/badge/Alerting%20%26%20Chat-Telegram%20Webhook%20Bot-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](#)
 
----
-
-## Architectural Evolution (v2.0)
-
-Originally built to track Cloudflare Zero-Trust tunnel connectors and external web endpoints, this platform now operates as a **full-spectrum Edge + LAN NOC appliance**:
-
-1. **Local System & Docker Vitals:** Tracks ARM64 CPU load, thermal throttling headroom, memory/swap pressure, disk I/O, and live Docker container states (Qdrant, FastEmbed, `cloudflared`).
-2. **Local LAN & Gateway Reconnaissance:** Executes low-overhead ARP/ICMP sweeps, gateway/ISP latency checks, DNS resolution benchmarks, and critical local device availability checks.
-3. **Cloudflare Zero-Trust & Edge Telemetry:** Validates outbound `cloudflared` tunnel health, TLS certificate expiration windows, and HTTP status/latency across production Cloudflare Workers and edge domains.
-4. **Gemma 4 Autonomous Diagnostics:** Pipes multi-layer telemetry anomalies into a local **Gemma 4** model to correlate symptoms (e.g., isolating local ISP jitter from an upstream Cloudflare PoP issue) and generate immediate remediation steps with zero external data leakage.
-5. **Stateful Telegram Incident Dispatch:** Pushes structured alerts, recovery confirmations, and scheduled NOC digests to Telegram with built-in cooldown deduplication to eliminate alert fatigue.
+</div>
 
 ---
 
-## System Architecture
+## ✨ 1. Executive Overview
 
-```text
-╔═══════════════════════════════════════════════════════════════════════════╗
-║                     TELEMETRY COLLECTION SURFACES                         ║
-╠═══════════════════════╦═══════════════════════════╦═══════════════════════╣
-║   1. RPi 5 Host &     ║     2. Local LAN &        ║  3. Cloudflare Edge   ║
-║   Docker Containers   ║     Gateway Subnet        ║  & Zero-Trust Tunnels ║
-║ • CPU / Thermal / RAM ║ • Gateway ICMP & Jitter   ║ • cloudflared Daemon  ║
-║ • NVMe / SD Disk I/O  ║ • Active ARP / Host Sweep ║ • HTTPS / TLS Expiry  ║
-║ • Qdrant / RAG Stack  ║ • Local DNS Resolution    ║ • Worker Endpoints    ║
-╚═══════════╤═══════════╩═════════════╤═════════════╩═══════════╤═══════════╝
-            │                         │                         │
-            └─────────────────────────┼─────────────────────────┘
-                                      ▼
-                     ┌─────────────────────────────────┐
-                     │   Python NOC Telemetry Engine   │
-                     │  (Threshold & State Evaluator)  │
-                     └────────┬───────────────┬────────┘
-                              │               │
-         [ Normal / Digest ]  │               │  [ Anomaly / State Change ]
-                              │               ▼
-                              │      ┌─────────────────────────────────┐
-                              │      │   Gemma 4 Diagnostic Engine     │
-                              │      │  • Multi-layer RCA correlation  │
-                              │      │  • Remediation command synthesis│
-                              │      └────────────────┬────────────────┘
-                              │                       │
-                              ▼                       ▼
-                     ┌─────────────────────────────────────────┐
-                     │       Telegram Bot Dispatcher           │
-                     │  • Cooldown & Flap Deduplication        │
-                     │  • Real-Time Incident + RCA Push Alerts │
-                     └─────────────────────────────────────────┘
-```
+**Cloudflare NOC Monitor (v2.1.0)** is a unified edge-to-hardware **Network Operations Center (NOC)** running natively on **Cloudflare Workers**, **Durable Objects (Embedded SQLite)**, **Workers Static Assets**, and **Workers AI**:
+
+- **`https://noc.tsimon.me/`** — Full glassmorphic NOC dashboard and operator APIs protected by **Cloudflare Zero Trust Access**.
+- **`https://noc-hook.tsimon.me/`** — Strictly isolated machine-to-machine Worker domain serving **only** cryptographically authenticated webhook & ingest endpoints (`/api/telegram/webhook`, `/api/ingest/rpi5`, `/api/ingest/esp32`, `/health`), returning `404` for all dashboard/UI routes.
+
+### 🎯 Operational Pillars
+
+| Pillar | Component | Cadence | Key Capabilities |
+| :--- | :--- | :---: | :--- |
+| **1. Multi-Zone Edge Operations** | [`src/collector.ts`](src/collector.ts) | **60s SWR** + **15m Cron** | Per-domain edge routing (`tsimon.me`, `minkalab.net`, `tsimon.app`, `boliviaremote.work`), 1h traffic, bandwidth, cache hit ratio, WAF threats, and strict HTTP `5xx` monitoring (**alerts ONLY when ≥ 100 errors/hour across a 2-hour consecutive time span**). |
+| **2. Serverless Quotas & Billing** | [`src/collector.ts`](src/collector.ts) | **60s SWR** + **15m Cron** | Workers & Pages, Workers AI Neurons, Workers KV, R2 Object Storage, plus **50 Billion rows/month** ceilings for both **D1 Monthly Rows Read** and **Durable Objects SQL Monthly Rows Read**. |
+| **3. Raspberry Pi 5 Edge Monitoring** | [`agents/rpi5/rpi5_noc_reporter.py`](agents/rpi5/rpi5_noc_reporter.py) | **15m Cron** (`/etc/cron.d/rpi5-noc-reporter`) | Full Linux system vitals (CPU/per-core, clock, load, SoC & RP1 temps, PWM fan RPM, core voltage, `vcgencmd` throttling flags, RAM/Swap, filesystems+inodes, NICs & Wi-Fi RSSI), **Qdrant** vector DB health, **Gemini Brain Sync** (`gemini-brain-watcher`, SQLite `sync_state.db`, Qdrant federation passes, `brain.tsimon.me` uplink), and **Critical Services** (systemd units, timers, Docker containers). |
+| **4. ESP-32S Out-of-Band Watchdog** | [`agents/rpi5/rpi5_noc_reporter.py`](agents/rpi5/rpi5_noc_reporter.py) + `esp32-monitor` | **15m LAN Probe** + **5m Heartbeat** | ICMP ping reachability, RTT min/avg/max/jitter, packet loss, TTL, ARP/MAC auto-discovery, 24h availability sparkline, plus rich device vitals (chip, 64-bit uptime, reset reason, internal temp, Wi-Fi RSSI/channel/reconnects, SRAM heap & fragmentation) and OOB Cloudflare probe matrix (`brain`, `kb`, `boliviaremote`, `minkalab` + CF Global Statuspage). |
+| **5. Foldable Autonomous Workers AI NOC Analyst** | [`src/evaluator.ts`](src/evaluator.ts) + [`src/ai-analyst.ts`](src/ai-analyst.ts) | **Every 15m** + **On-Demand** | Deterministic multi-layer anomaly matrix + `@cf/google/gemma-3-12b-it` (fallback `@cf/meta/llama-3.1-8b-instruct-fast`) assessment presented in a **foldable UI section** (persisted in `localStorage`) with interactive Q&A and `24h`/`72h`/`7d` snooze manager. |
+| **6. Exhaustive Telegram Alerting & Bot** | [`src/telegram.ts`](src/telegram.ts) | **Real-Time Webhook** + **Proactive Alerts** | Proactive alerts with cooldown, recovery notifications, inline `[24h][72h][7d]` snooze keyboards, and **23 deep slash commands** + natural-language Workers AI chat. |
 
 ---
 
-## 3-Tier Observability Matrix
+## 📊 2. Deterministic Alerting Rules & Thresholds
 
-| Tier | Target Surface | Monitored Metrics | Failure Trigger Example |
-|---|---|---|---|
-| **Tier 1: Edge Host** | Raspberry Pi 5 (ARM64) & Docker Engine | CPU %, SoC Temp (`°C`), RAM/Swap %, Disk usage, Container healthchecks | SoC Temp `> 75°C`, Disk `> 85%`, or `qdrant` / `cloudflared` container restart |
-| **Tier 2: Local LAN** | Default Gateway, Local Subnet & DNS | Gateway RTT (ms), Packet Loss %, Active LAN hosts, DNS query time | Gateway packet loss `> 5%`, DNS timeout, or critical LAN node unreachable |
-| **Tier 3: Cloud Edge** | Cloudflare Tunnels & Production Domains | `cloudflared` metrics endpoint, HTTP status codes, TTFB (ms), TLS days remaining | Tunnel connector degraded, HTTP `5xx`, TTFB `> 1500ms`, or TLS `< 14 days` |
-
----
-
-## Gemma 4 Intelligence & Telegram Alert Payload
-
-When the telemetry collector detects a threshold breach, it constructs a structured JSON state snapshot across all three tiers and queries the local **Gemma 4** runtime before dispatching the Telegram notification.
-
-### Example Telegram Push Notification
-
-```text
-🚨 [NOC ALERT - DEGRADED] Edge Node: rpi5-lapaz-01
-⏱ Timestamp: 2026-11-12 17:45:02 UTC-4
-
-📊 TELEMETRY SNAPSHOT
-• Host Vitals: CPU 34% | Temp 58.2°C | RAM 61% (OK)
-• Local LAN: Gateway (192.168.0.1) RTT 142ms | Loss: 8.0% (WARN)
-• Edge Tunnel: cloudflared QUIC conn flapping | brain.tsimon.me TTFB 1840ms
-
-🧠 GEMMA 4 ROOT-CAUSE ANALYSIS
-Upstream Cloudflare tunnel instability correlates directly with 8% packet loss and elevated RTT (142ms) at the local LAN gateway (192.168.0.1). Local RPi5 compute and Docker containers remain healthy. Root cause is local ISP last-mile congestion rather than Cloudflare Edge or host exhaustion.
-
-🛠 RECOMMENDED ACTION
-1. Verify DOCSIS/gateway upstream SNR on local router (192.168.0.1).
-2. Keep cloudflared running; QUIC protocol will auto-recover once gateway packet loss drops below 2%.
-```
+| Category | Key Pattern | Warning (`WARNING`) | Critical (`CRITICAL`) |
+| :--- | :--- | :---: | :---: |
+| **Edge Origin `5xx` (Strict Rule)** | `cf_domain_5xx:<domain>` | **≥ 100 HTTP `5xx` errors/hour across 2 consecutive hours** (never alerts below this threshold) | — |
+| **Edge Domain Routing** | `cf_domain_status:<domain>` | — | Zone status `!= HEALTHY` |
+| **Edge WAF Threats** | `cf_domain_threats:<domain>` | `>= 15` / 1h | `>= 100` / 1h |
+| **D1 Monthly Rows Read** | `quota:d1_reads_monthly` | `>= 60%` of **50,000,000,000 / mo** | `>= 80%` of **50,000,000,000 / mo** |
+| **DO SQL Monthly Rows Read** | `quota:do_reads_monthly` | `>= 60%` of **50,000,000,000 / mo** | `>= 80%` of **50,000,000,000 / mo** |
+| **Workers / AI / D1 Write / DO / KV / R2** | `quota:*` | `>= 60%` of tier limit | `>= 80%` of tier limit |
+| **RPi5 Telemetry Freshness** | `rpi5:stale_report` | — | Last cron push `> 35 min` old |
+| **RPi5 CPU / Load / SoC Temp** | `rpi5:cpu`, `rpi5:load`, `rpi5:thermal` | `80%` / `80%` / `70°C` | `92%` / `95%` / `80°C` |
+| **RPi5 Power/Thermal Throttling** | `rpi5:throttled` | — | Active `vcgencmd` throttle bits (`0x0`..`0xf`) |
+| **RPi5 RAM / Swap / Disk** | `rpi5:ram`, `rpi5:swap`, `rpi5:disk:<mp>` | `85%` / `85%` / `80%` | `93%` / `95%` / `90%` |
+| **RPi5 Qdrant Vector DB** | `rpi5:qdrant_down`, `rpi5:qdrant_status` | `yellow` | Unreachable / `healthz` fail / `red` |
+| **RPi5 Brain Sync Daemon** | `rpi5:sync_*` | Qdrant pass `> 45m` stale or `>= 5` errors | Daemon down or `brain.tsimon.me` uplink down |
+| **RPi5 Critical Services** | `rpi5:svc:<service>` | — | Any critical systemd/Docker service inactive |
+| **ESP-32S Ping / Loss / Latency** | `esp32:unreachable`, `esp32:packet_loss`, `esp32:high_latency` | `>= 20%` loss or `>= 150ms` avg RTT | Unreachable, `>= 60%` loss, or `>= 400ms` avg RTT |
+| **ESP-32S Radio / Heap / OOB Probes** | `esp32:weak_wifi`, `esp32:low_heap`, `esp32:oob_down:<ep>` | RSSI `<= -78 dBm` or heap `< 40 KB` | OOB endpoint `DOWN` or CF Global major/critical incident |
 
 ---
 
-## Repository Structure
+## 💬 3. Exhaustive Telegram Bot Commands
 
-```text
-raspberry-pi-cloudflare-network-operations-monitor/
-├── src/
-│   ├── monitor.py             # Main event loop, scheduler & state machine
-│   ├── collectors/
-│   │   ├── host_vitals.py     # RPi 5 CPU, thermal, disk & Docker socket checks
-│   │   ├── lan_scanner.py     # Gateway ICMP, DNS benchmark & local subnet sweep
-│   │   └── edge_tunnels.py    # cloudflared metrics & HTTPS/TLS domain probes
-│   ├── ai/
-│   │   └── gemma_analyzer.py  # Local Ollama / Gemma 4 prompt builder & RCA parser
-│   └── notifiers/
-│       └── telegram_bot.py    # Telegram Bot API client with alert deduplication
-├── config/
-│   └── config.example.yaml    # Thresholds, target LAN IPs & domain inventory
-├── systemd/
-│   └── noc-monitor.service    # Hardened systemd unit for 24/7 background execution
-├── .env.example               # Environment variables template
-├── requirements.txt           # Python dependencies (psutil, httpx, pyyaml)
-└── README.md
-```
+Dedicated bot token (keeps `@minkalab_alert_bot` isolated on the ESP-32S watchdog). Run `.\scripts\setup-telegram.ps1` after creating your BotFather bot to upload `TELEGRAM_BOT_TOKEN`, register the webhook on `https://noc-hook.tsimon.me/api/telegram/webhook`, and sync all 23 commands:
+
+| Command | Scope |
+| :--- | :--- |
+| `/status` | Master executive NOC overview across Cloudflare, RPi5 & ESP-32S + AI verdict |
+| `/full` (`/report`, `/all`) | Exhaustive multi-part dump of every subsystem (auto-chunked safely under 4,096 chars) |
+| `/alerts` (`/anomalies`) | Active anomalies, snoozed items with countdowns & inline snooze/unsnooze buttons |
+| `/cf [domain]` | Cloudflare Edge zones traffic, bandwidth, cache hit ratio, WAF threats & 5xx |
+| `/5xx` | Dedicated HTTP 5xx hourly audit, active streaks & `>= 100/hr × 2h` policy check |
+| `/quotas` (`/billing`) | All 6 Cloudflare platform quotas (including 50B/mo D1 & DO reads) & MTD billable USD |
+| `/workers`, `/do`, `/d1`, `/ai`, `/kv`, `/r2` | Deep per-script, per-namespace, per-DB, per-model, and per-bucket breakdowns |
+| `/pi` (`/rpi5`, `/vitals`) | Full Raspberry Pi 5 vitals (CPU/per-core, thermals, fan, voltage, RAM/swap, disks, NICs, Wi-Fi) |
+| `/qdrant` | Qdrant status, version, collection points, segments, optimizer, disk MB & latency |
+| `/sync` | `gemini-brain-watcher` status, SQLite synced chunks by prefix, last Qdrant pass, errors & uplink |
+| `/services` (`/svc`) | Full table of critical systemd units, timers & Docker containers with PID & RSS MB |
+| `/esp32` (`/watchdog`, `/ping`) | ESP-32S ICMP ping, RTT min/avg/max/jitter, loss, 24h uptime, Wi-Fi/heap & OOB Cloudflare probes |
+| `/snooze`, `/unsnooze` | Interactive or CLI snoozing (`24h`, `72h`, `7d`) |
+| `/analyze`, `/refresh` | Force live Workers AI evaluation or Cloudflare telemetry collection |
+| `/ask <question>` or plain text | Interactive Workers AI NOC Engineer Q&A grounded in full live telemetry |
 
 ---
 
-## Quickstart & Deployment
+## 🚀 4. Deployment & Testing
 
-### 1. Prerequisites
-* **Hardware:** Raspberry Pi 5 (4GB or 8GB RAM) running Raspberry Pi OS / Debian Bookworm (64-bit ARM64).
-* **AI Runtime:** [Ollama](https://ollama.com/) installed locally with `gemma4` pulled, or configured via API endpoint:
-  ```bash
-  ollama pull gemma4
-  ```
-* **Cloudflare Tunnel:** Active `cloudflared` service running with metrics enabled (`--metrics 127.0.0.1:20241`).
-* **Telegram Bot:** A Bot Token from `@BotFather` and your target `TELEGRAM_CHAT_ID`.
-
-### 2. Installation
 ```bash
-git clone [https://github.com/t0m-a/raspberry-pi-cloudflare-network-operations-monitor.git](https://github.com/t0m-a/raspberry-pi-cloudflare-network-operations-monitor.git)
-cd raspberry-pi-cloudflare-network-operations-monitor
+# Typecheck & run all 10 unit + integration tests
+npm run typecheck
+npm test
 
-python3 -m venv .venv
-source .venv/bin/activate
-pip install -r requirements.txt
+# Deploy Cloudflare Worker + Static Assets + Custom Domains (noc.tsimon.me & noc-hook.tsimon.me)
+npm run deploy
+
+# Configure dedicated Telegram bot + webhook + 23 slash commands
+.\scripts\setup-telegram.ps1
 ```
 
-### 3. Configuration
-Copy the environment and configuration templates:
-```bash
-cp .env.example .env
-cp config/config.example.yaml config/config.yaml
-```
-
-Populate `.env` with your credentials and runtime parameters:
-```ini
-# Telegram Notification Settings
-TELEGRAM_BOT_TOKEN="your_botfather_token_here"
-TELEGRAM_CHAT_ID="your_chat_id_here"
-
-# Gemma 4 / Ollama Inference Endpoint
-OLLAMA_HOST="[http://127.0.0.1:11434](http://127.0.0.1:11434)"
-OLLAMA_MODEL="gemma4"
-
-# Local Network & Edge Parameters
-LAN_GATEWAY_IP="192.168.0.1"
-LAN_SUBNET="192.168.0.0/24"
-CLOUDFLARED_METRICS_URL="[http://127.0.0.1:20241/metrics](http://127.0.0.1:20241/metrics)"
-ALERT_COOLDOWN_SECONDS="900"
-```
-
-### 4. Run as a 24/7 `systemd` Service
-```bash
-sudo cp systemd/noc-monitor.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable --now noc-monitor.service
-
-# Inspect live NOC telemetry and Gemma 4 diagnostics
-sudo journalctl -u noc-monitor.service -f
-```
-
----
-
-## Related Ecosystem Projects
-
-* **[`gemini-brain`](https://github.com/t0m-a/gemini-brain) (`brain.tsimon.me`):** Stateful Cloudflare Durable Objects & SQLite cognitive memory server (MCP).
-* **[`scout-analyst-pipelines-agents`](https://github.com/t0m-a/scout-analyst-pipelines-agents) (`boliviaremote.work`):** Agentic opportunity reconnaissance and 100-point remote role evaluation platform.
-* **[`Edge-Semantic-Search-RAG-Knowledge-Hub`](https://github.com/t0m-a/Edge-Semantic-Search-RAG-Knowledge-Hub):** Sovereign Qdrant + FastEmbed RAG documentation system running on Raspberry Pi 5.
-* **[`MinkaLab`](https://github.com/t0m-a/MinkaLab) (`minkalab.net`):** Trilingual digital hygiene, cloud security auditing, and edge telemetry frameworks.
-
----
-
-## Author
-
-**Thomas Simon** — Senior Systems Engineer, NOC Specialist & Edge AI Architect  
-🌐 [tsimon.me](https://tsimon.me) | 🛡 [minkalab.net](https://minkalab.net) | 💼 [boliviaremote.work](https://boliviaremote.work)
+### Worker Secrets Reference
+- `CLOUDFLARE_API_TOKEN` — Scoped read-only Cloudflare Analytics/REST API token
+- `NOC_INGEST_TOKEN` — Bearer token used by Raspberry Pi 5 cron agent and ESP-32S heartbeat push
+- `TELEGRAM_BOT_TOKEN` — Dedicated `@BotFather` bot token for `cloudflare-noc-monitor`
+- `TELEGRAM_CHAT_ID` — Authorized operator Telegram Chat ID (fail-closed allowlist)
+- `TELEGRAM_WEBHOOK_SECRET` — Cryptographic `X-Telegram-Bot-Api-Secret-Token` verified on `/api/telegram/webhook`

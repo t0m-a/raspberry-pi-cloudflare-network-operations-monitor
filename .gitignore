@@ -1,3 +1,15 @@
+# Node / Wrangler / Build artifacts
+node_modules/
+.wrangler/
+dist/
+
+# Secrets & local env overrides
+.dev.vars
+.env
+.env.*
+*.local.service
+*.log
+
 # Python
 __pycache__/
 *.py[cod]
@@ -8,13 +20,9 @@ env/
 venv/
 ENV/
 
-# Sensitive local configurations
-.env
-*.local.service
-
 # Atomic swap & temp files
 *.tmp
 
-# Operating System files
+# OS files
 .DS_Store
 Thumbs.db

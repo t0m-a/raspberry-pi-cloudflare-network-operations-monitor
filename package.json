@@ -1,0 +1,19 @@
+{
+  "name": "cloudflare-network-operations-monitor",
+  "version": "2.1.0",
+  "private": true,
+  "description": "Self-contained Cloudflare Edge, Raspberry Pi 5 & ESP-32S Network Operations Center (NOC) with Durable Object SQLite state, Workers AI analyst, exhaustive Telegram alerting/commands, and Cloudflare Access protection.",
+  "type": "module",
+  "scripts": {
+    "dev": "wrangler dev",
+    "deploy": "wrangler deploy",
+    "typecheck": "tsc --noEmit",
+    "test": "node --experimental-strip-types --test test/*.test.ts",
+    "tail": "wrangler tail"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261119.1",
+    "typescript": "^5.8.2",
+    "wrangler": "^4.0.0"
+  }
+}
