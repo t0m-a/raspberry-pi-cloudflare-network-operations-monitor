@@ -530,7 +530,7 @@ describe("Dashboard Mobile Menu & Collapsible Workers AI Analyst UI", () => {
       overall_status: "WARNING",
       anomalies_count: 1,
       reason_code: "SCHEDULED",
-      model: "@cf/google/gemma-3-12b-it",
+      model: "@cf/google/gemma-4-26b-a4b-it",
       last_analyzed_utc: "2026-11-24 00:45:00 UTC",
       inference_duration_sec: 1.4,
       analysis: "* **Status**: 1 minor warning detected.",

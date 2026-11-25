@@ -1865,7 +1865,7 @@
                             ${aiSnoozed.length ? `<span class="tag" style="margin-left:0;">💤 ${aiSnoozed.length} snoozed</span>` : ''}
                         </span>
                         <span class="ai-analyst-header-right">
-                            <span class="subtitle-badge ai-analyst-meta-badge">${escapeHtml(aiData.model || '@cf/google/gemma-3-12b-it')} | Last Check: ${escapeHtml(aiData.last_analyzed_utc || '--')} (${aiData.inference_duration_sec ?? 0}s)</span>
+                            <span class="subtitle-badge ai-analyst-meta-badge">${escapeHtml(aiData.model || '@cf/google/gemma-4-26b-a4b-it')} | Last Check: ${escapeHtml(aiData.last_analyzed_utc || '--')} (${aiData.inference_duration_sec ?? 0}s)</span>
                             <span id="ai-analyst-chevron" class="assessment-chevron">${aiAnalystExpanded ? '▾ Collapse' : '▸ Expand'}</span>
                         </span>
                     </button>

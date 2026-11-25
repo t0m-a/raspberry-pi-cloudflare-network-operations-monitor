@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { runAutomatedNocAnalysis } from "../src/ai-analyst.ts";
 import {
   classifyR2ActionType,
   fetchAccountBillingAndUsage,
@@ -730,9 +731,20 @@ describe("End-to-End Worker, Host Isolation, Ingest & Telegram Integration", () 
         TELEGRAM_BOT_TOKEN: "123456:TESTTOKEN",
         TELEGRAM_CHAT_ID: "8590242462",
         TELEGRAM_WEBHOOK_SECRET: "tg-webhook-secret-xyz",
-        AI_MODEL: "@cf/google/gemma-3-12b-it",
+        AI_MODEL: "@cf/google/gemma-4-26b-a4b-it",
         AI: {
-          run: async () => ({ response: "* **Status**: Healthy across Cloudflare, RPi5, and ESP-32S." }),
+          run: async () => ({
+            choices: [
+              {
+                index: 0,
+                message: {
+                  role: "assistant",
+                  content: "* **Status**: Healthy across Cloudflare, RPi5, and ESP-32S.",
+                },
+                finish_reason: "stop",
+              },
+            ],
+          }),
         } as any,
         ASSETS: {
           fetch: async () => new Response("<html>NOC Dashboard</html>", { status: 200 }),
@@ -981,5 +993,43 @@ describe("End-to-End Worker, Host Isolation, Ingest & Telegram Integration", () 
     } finally {
       globalThis.fetch = origFetch;
     }
+  });
+
+  it("uses @cf/google/gemma-4-26b-a4b-it by default with ChatCompletions extraction and enable_thinking disabled", async () => {
+    const calls: Array<{ model: string; inputs: any }> = [];
+    const mockEnv: Env = {
+      CLOUDFLARE_API_TOKEN: "test-token",
+      CLOUDFLARE_ACCOUNT_ID: "70f73cd2a15a31eba64e1aa860d47614",
+      NOC_INGEST_TOKEN: "test-ingest",
+      AI: {
+        run: async (model: string, inputs: any) => {
+          calls.push({ model, inputs });
+          return {
+            id: "chatcmpl-gemma4",
+            object: "chat.completion",
+            choices: [
+              {
+                index: 0,
+                message: {
+                  role: "assistant",
+                  content: "* **Status**: All Cloudflare, RPi5, and ESP-32S systems nominal.",
+                },
+                finish_reason: "stop",
+              },
+            ],
+          };
+        },
+      } as any,
+      ASSETS: {} as any,
+      NOC_MONITOR_DO: {} as any,
+    };
+
+    const out = await runAutomatedNocAnalysis(mockEnv, "Snapshot: nominal", "SCHEDULED", []);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].model, "@cf/google/gemma-4-26b-a4b-it");
+    assert.equal(calls[0].inputs.max_tokens, 1024);
+    assert.deepEqual(calls[0].inputs.chat_template_kwargs, { enable_thinking: false });
+    assert.equal(out.modelUsed, "@cf/google/gemma-4-26b-a4b-it (Workers AI)");
+    assert.ok(out.text.includes("All Cloudflare, RPi5, and ESP-32S systems nominal."));
   });
 });

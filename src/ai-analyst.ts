@@ -1,6 +1,6 @@
 import { type AnomalyFinding, type Env } from "./types.ts";
 
-const DEFAULT_PRIMARY_MODEL = "@cf/google/gemma-3-12b-it";
+const DEFAULT_PRIMARY_MODEL = "@cf/google/gemma-4-26b-a4b-it";
 const DEFAULT_FALLBACK_MODEL = "@cf/meta/llama-3.1-8b-instruct-fast";
 
 function extractAiText(rawResponse: any): string {
@@ -12,6 +12,9 @@ function extractAiText(rawResponse: any): string {
   }
   if (typeof rawResponse.response === "string") {
     return rawResponse.response.trim();
+  }
+  if (typeof rawResponse.output_text === "string") {
+    return rawResponse.output_text.trim();
   }
   const choiceContent = rawResponse?.choices?.[0]?.message?.content;
   if (typeof choiceContent === "string") {
@@ -42,14 +45,17 @@ async function runWorkersAiChat(
   if (env.AI && typeof env.AI.run === "function") {
     for (const modelId of candidates) {
       try {
-        const res = await (env.AI as any).run(modelId, {
+        const isGemma4 = modelId.startsWith("@cf/google/gemma-4-");
+        const requestInputs: Record<string, unknown> = {
           messages: [
             { role: "system", content: systemInstruction },
             { role: "user", content: userPrompt },
           ],
-          max_tokens: maxTokens,
+          max_tokens: isGemma4 ? Math.max(maxTokens, 1024) : maxTokens,
           temperature: 0.2,
-        });
+          ...(isGemma4 ? { chat_template_kwargs: { enable_thinking: false } } : {}),
+        };
+        const res = await (env.AI as any).run(modelId, requestInputs);
         const text = extractAiText(res);
         if (text) {
           const elapsedSec = Math.round(((performance.now() - t0) / 1000) * 100) / 100;

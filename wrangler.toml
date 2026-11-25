@@ -45,7 +45,7 @@ CF_ZONE_ID_3 = "a4b5db9d7286d2b9355b1e58a44861f5"
 CF_ZONE_ID_4 = "6d8621601152ad18ca7ca14a5c19cf14"
 
 # Workers AI models (primary + automatic fallback)
-AI_MODEL = "@cf/google/gemma-3-12b-it"
+AI_MODEL = "@cf/google/gemma-4-26b-a4b-it"
 AI_FALLBACK_MODEL = "@cf/meta/llama-3.1-8b-instruct-fast"
 
 # Stale-While-Revalidate cache TTL (seconds) when dashboard polls /metrics.json

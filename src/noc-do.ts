@@ -264,7 +264,7 @@ export class NocMonitorDO implements DurableObject {
       model:
         prevPublic?.model ||
         activeState.last_ai_model ||
-        `${this.env.AI_MODEL || "@cf/google/gemma-3-12b-it"} (Workers AI)`,
+        `${this.env.AI_MODEL || "@cf/google/gemma-4-26b-a4b-it"} (Workers AI)`,
       inference_duration_sec: Number(prevPublic?.inference_duration_sec ?? activeState.last_inference_sec ?? 0.0),
       overall_status: overallStatus,
       reason_code: reasonOverride || prevPublic?.reason_code || activeState.last_reason_code || "SCHEDULED",
@@ -302,7 +302,7 @@ export class NocMonitorDO implements DurableObject {
 
     let aiAnalysisText = prevState.last_ai_analysis || "";
     let aiModelUsed =
-      prevState.last_ai_model || `${this.env.AI_MODEL || "@cf/google/gemma-3-12b-it"} (Workers AI)`;
+      prevState.last_ai_model || `${this.env.AI_MODEL || "@cf/google/gemma-4-26b-a4b-it"} (Workers AI)`;
     let inferenceSec = Number(prevState.last_inference_sec || 0.0);
     let lastLlmTs = Number(prevState.last_llm_ts || 0.0);
 
