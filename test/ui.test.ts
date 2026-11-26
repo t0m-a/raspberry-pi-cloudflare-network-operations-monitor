@@ -593,4 +593,59 @@ describe("Dashboard Mobile Menu & Collapsible Workers AI Analyst UI", () => {
       assert.equal(env.localStorage.getItem("noc_ai_analyst_expanded"), "false");
     }
   });
+
+  it("enforces Swiss Minimalist Carbon Dark tokens, zero legacy slate/neon leaks, polish fixes, and threshold-aligned progress bars", () => {
+    const html = fs.readFileSync(INDEX_HTML_PATH, "utf8");
+
+    // Canonical Swiss Carbon Dark design tokens & desktop measure
+    for (const token of [
+      "--bg-page: #09090b;",
+      "--bg-card: #111113;",
+      "--bg-well: #18181b;",
+      "--bg-well-hover: #27272a;",
+      "--text-main: #fafafa;",
+      "--text-secondary: #d4d4d8;",
+      "--text-muted: #a1a1aa;",
+      "--border-hairline: rgba(255, 255, 255, 0.08);",
+      "max-width: 1360px;",
+      "font-variant-numeric: tabular-nums;",
+    ]) {
+      assert.ok(html.includes(token), `Missing Swiss Minimalist Dark token: ${token}`);
+    }
+
+    // Zero legacy navy/slate/orange/cyan hex leaks anywhere in public/index.html
+    for (const legacyHex of [
+      "#0f172a",
+      "#0b1329",
+      "#111c30",
+      "#162238",
+      "#1e293b",
+      "#1e3a5f",
+      "#334155",
+      "#38bdf8",
+      "#0284c7",
+      "#f97316",
+      "#c084fc",
+      "#64748b",
+      "#94a3b8",
+    ]) {
+      assert.ok(!html.toLowerCase().includes(legacyHex), `Legacy non-Swiss hex ${legacyHex} leaked in public/index.html`);
+    }
+
+    // 5 live Chrome audit polish fixes
+    assert.ok(html.includes("table.breakdown-table td.status-crit"), "Table status cell specificity fix must exist");
+    assert.match(html, /\.subtitle-badge\s*\{[\s\S]*?text-transform:\s*none;/, "Subsection badges must preserve original casing");
+    assert.match(html, /\.nav-pills\s*\{[\s\S]*?top:\s*0;/, "Sticky nav must dock flush at top: 0 with zero text peek");
+    assert.ok(html.includes("GMT\\u20114"), "Timestamps must use non-breaking hyphen in GMT-4");
+    assert.ok(html.includes("ESP&#8209;32S"), "Headings must use non-breaking hyphen in ESP-32S");
+    assert.match(html, /@media\s*\(max-width:\s*480px\)\s*\{[\s\S]*?\.anomalies-bulk-row[\s\S]*?justify-content:\s*flex-start;/, "Compact mobile bulk snooze row must align cleanly");
+
+    // Threshold-aligned progress bar helper for RPi5 / ESP-32S cards
+    const env = createDashboardSandbox({ innerWidth: 1440, innerHeight: 900 });
+    assert.equal(env.ctx.getThresholdProgressClass(65.3, 85, 93), "bg-healthy");
+    assert.equal(env.ctx.getThresholdProgressClass(88.0, 85, 93), "bg-warn");
+    assert.equal(env.ctx.getThresholdProgressClass(95.0, 85, 93), "bg-crit");
+    assert.equal(env.ctx.getThresholdProgressClass(null, 85, 93), "bg-info");
+    assert.ok(env.ctx.formatSyncTimestamp("2026-11-26 04:00:00 UTC").includes("GMT\u20114"));
+  });
 });

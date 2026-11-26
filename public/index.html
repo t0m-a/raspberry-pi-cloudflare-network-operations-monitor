@@ -5,41 +5,156 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Cloudflare, Raspberry Pi 5 &amp; ESP-32S Network Operations Center</title>
     <link rel="icon" type="image/svg+xml" href="favicon.svg">
-    <link rel="alternate icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='%230f172a' stroke='%2338bdf8' stroke-width='2.5'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%231e3a5f' stroke-width='1.5' stroke-dasharray='4 3'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='%231e3a5f' stroke-width='1.2'/%3E%3Cline x1='32' y1='32' x2='17' y2='18' stroke='%2338bdf8' stroke-width='2' stroke-opacity='0.75'/%3E%3Cline x1='32' y1='32' x2='48' y2='19' stroke='%2338bdf8' stroke-width='2' stroke-opacity='0.75'/%3E%3Cline x1='32' y1='32' x2='47' y2='46' stroke='%2338bdf8' stroke-width='2' stroke-opacity='0.75'/%3E%3Cpolyline points='8,36 18,36 23,24 29,43 35,20 40,36 56,36' fill='none' stroke='%2322c55e' stroke-width='3.2' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='17' cy='18' r='3.5' fill='%2338bdf8'/%3E%3Ccircle cx='48' cy='19' r='3.5' fill='%2338bdf8'/%3E%3Ccircle cx='47' cy='46' r='3.5' fill='%2322c55e'/%3E%3Ccircle cx='35' cy='20' r='4' fill='%23f97316' stroke='%230f172a' stroke-width='1.5'/%3E%3C/svg%3E">
+    <link rel="alternate icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect x='2' y='2' width='60' height='60' rx='14' fill='%2309090b' stroke='%23fafafa' stroke-width='2' stroke-opacity='0.22'/%3E%3Ccircle cx='32' cy='32' r='22' fill='none' stroke='%2327272a' stroke-width='1.5' stroke-dasharray='4 3'/%3E%3Ccircle cx='32' cy='32' r='13' fill='none' stroke='%2327272a' stroke-width='1.2'/%3E%3Cline x1='32' y1='32' x2='17' y2='18' stroke='%23a1a1aa' stroke-width='1.8' stroke-opacity='0.65'/%3E%3Cline x1='32' y1='32' x2='48' y2='19' stroke='%23a1a1aa' stroke-width='1.8' stroke-opacity='0.65'/%3E%3Cline x1='32' y1='32' x2='47' y2='46' stroke='%23a1a1aa' stroke-width='1.8' stroke-opacity='0.65'/%3E%3Cpolyline points='8,36 18,36 23,24 29,43 35,20 40,36 56,36' fill='none' stroke='%2310b981' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'/%3E%3Ccircle cx='17' cy='18' r='3.2' fill='%23fafafa'/%3E%3Ccircle cx='48' cy='19' r='3.2' fill='%23fafafa'/%3E%3Ccircle cx='47' cy='46' r='3.2' fill='%2310b981'/%3E%3Ccircle cx='35' cy='20' r='3.8' fill='%23fafafa' stroke='%2309090b' stroke-width='1.5'/%3E%3C/svg%3E">
     <style>
-        html { scroll-behavior: smooth; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background: #0f172a; color: #f8fafc; margin: 2rem; }
-        h1 { margin-bottom: 0.4rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; }
-        h2 { color: #e2e8f0; border-bottom: 1px solid #1e293b; padding-bottom: 0.5rem; margin-top: 2.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
-        #sec-gemma-ai, #sec-edge-domains, #sec-cloud-billing, #sec-durable-objects, #sec-workers-ai, #sec-d1-databases, #sec-kv-storage, #sec-r2-storage, #sec-rpi5, #sec-esp32 { scroll-margin-top: 4.75rem; }
-        .top-bar { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.75rem; margin-bottom: 1rem; }
-        .action-bar { display: flex; align-items: center; gap: 0.5rem; flex-wrap: wrap; }
+        /* ================================================================
+           03 · SWISS MINIMALIST DESIGN SYSTEM (CARBON DARK — ALL VIEWS)
+           Vercel / Gallery Monochrome · Hairline Outer Contours · Tabular Metrics
+           ================================================================ */
+        :root {
+            --bg-page: #09090b;
+            --bg-card: #111113;
+            --bg-well: #18181b;
+            --bg-well-hover: #27272a;
+            --bg-nav: rgba(17, 17, 19, 0.92);
+            --text-main: #fafafa;
+            --text-secondary: #d4d4d8;
+            --text-muted: #a1a1aa;
+            --border-hairline: rgba(255, 255, 255, 0.08);
+            --border-control: rgba(255, 255, 255, 0.15);
+            --border-strong: rgba(255, 255, 255, 0.28);
+            --accent-primary: #fafafa;
+            --accent-hover: #e4e4e7;
+            --accent-fg: #09090b;
+            --status-healthy: #6ee7b7;
+            --status-healthy-bar: #10b981;
+            --status-healthy-bg: rgba(16, 185, 129, 0.16);
+            --status-warn: #fde68a;
+            --status-warn-bar: #f59e0b;
+            --status-warn-bg: rgba(245, 158, 11, 0.16);
+            --status-crit: #fca5a5;
+            --status-crit-pill: #fecaca;
+            --status-crit-bar: #ef4444;
+            --status-crit-bg: rgba(239, 68, 68, 0.16);
+            --status-info: #fafafa;
+            --font-head: "Bahnschrift", "Segoe UI Variable Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            --font-body: "Segoe UI Variable Text", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: "Consolas", ui-monospace, SFMono-Regular, Menlo, Monaco, monospace;
+            --radius-panel: 10px;
+            --radius-well: 8px;
+            --radius-control: 7px;
+        }
+        * { box-sizing: border-box; }
+        html {
+            scroll-behavior: smooth;
+            background: var(--bg-page);
+            overflow-x: clip;
+        }
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-page);
+            color: var(--text-main);
+            line-height: 1.55;
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 28px 28px 64px 28px;
+            -webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+        }
+        h1, h2, h3, h4, p, span, a, button, td, th, .domain-section, .card {
+            overflow-wrap: break-word;
+            word-wrap: break-word;
+        }
+        button, a, input {
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+        h1 {
+            font-family: var(--font-head);
+            font-size: 1.55rem;
+            font-weight: 600;
+            letter-spacing: -0.025em;
+            line-height: 1.25;
+            color: var(--text-main);
+            margin: 0 0 0.75rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+        }
+        .header-badges {
+            display: flex;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+            align-items: center;
+            max-width: 100%;
+        }
+        h2 {
+            font-family: var(--font-head);
+            font-size: 1.12rem;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            color: var(--text-secondary);
+            border-bottom: none;
+            padding-bottom: 0;
+            margin: 2.35rem 0 0.85rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        #sec-gemma-ai, #sec-edge-domains, #sec-cloud-billing, #sec-durable-objects, #sec-workers-ai, #sec-d1-databases, #sec-kv-storage, #sec-r2-storage, #sec-rpi5, #sec-esp32 {
+            scroll-margin-top: 4.5rem;
+        }
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.75rem 1.25rem;
+            margin-bottom: 1.25rem;
+            padding: 0.9rem 1.2rem;
+            background: var(--bg-card);
+            border: 1px solid var(--border-hairline);
+            border-radius: var(--radius-panel);
+        }
+        .action-bar {
+            display: flex;
+            align-items: center;
+            gap: 0.45rem;
+            flex-wrap: wrap;
+        }
+        /* Sticky Swiss Carbon Glass Navigation (flush top: 0 prevents scrolled text peek) */
         .nav-pills {
             position: sticky;
-            top: 0.75rem;
+            top: 0;
             z-index: 1000;
             display: flex;
             flex-direction: column;
-            margin-bottom: 1.75rem;
-            padding: 0.5rem 0.75rem;
+            margin-bottom: 1.5rem;
+            padding: 0.42rem 0.5rem;
             width: fit-content;
             max-width: 100%;
             box-sizing: border-box;
-            background: rgba(15, 23, 42, 0.58);
-            backdrop-filter: blur(10px) saturate(140%);
-            -webkit-backdrop-filter: blur(10px) saturate(140%);
-            border-radius: 999px;
-            border: 1px solid rgba(56, 189, 248, 0.2);
-            box-shadow: 0 8px 24px rgba(2, 6, 23, 0.35);
-            transition: background 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+            background: var(--bg-nav);
+            backdrop-filter: blur(12px) saturate(140%);
+            -webkit-backdrop-filter: blur(12px) saturate(140%);
+            border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+            border: 1px solid var(--border-hairline);
+            border-top-color: transparent;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.36);
+            transition: background 0.2s ease, border-color 0.2s ease;
         }
         .nav-pills:hover {
-            background: rgba(15, 23, 42, 0.85);
-            border-color: rgba(56, 189, 248, 0.38);
+            background: rgba(17, 17, 19, 0.97);
+            border-color: var(--border-control);
+            border-top-color: transparent;
         }
         .nav-pills-list {
             display: flex;
-            gap: 0.45rem;
+            gap: 0.28rem;
             flex-wrap: wrap;
             align-items: center;
         }
@@ -51,121 +166,525 @@
         }
         .nav-pill {
             font-size: 0.79rem;
-            color: rgba(226, 232, 240, 0.9);
-            background: rgba(22, 34, 56, 0.6);
-            padding: 0.33rem 0.78rem;
-            border-radius: 999px;
-            border: 1px solid rgba(56, 189, 248, 0.25);
-            text-decoration: none;
-            transition: background 0.2s, border-color 0.2s, color 0.2s, transform 0.15s;
-        }
-        .nav-pill:hover, .nav-pill.active {
-            background: rgba(56, 189, 248, 0.2);
-            color: #38bdf8;
-            border-color: rgba(56, 189, 248, 0.75);
-        }
-        .domain-section { margin-bottom: 2.25rem; background: #111c30; padding: 1.5rem; border-radius: 12px; border: 1px solid #1e293b; }
-        .domain-title { font-size: 1.38rem; color: #38bdf8; font-weight: bold; margin-top: 0; border-bottom: 2px solid #1e293b; padding-bottom: 0.5rem; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
-        .subsection-title { font-size: 0.95rem; color: #cbd5e1; font-weight: 700; text-transform: uppercase; letter-spacing: 0.05em; margin: 1.4rem 0 0.6rem 0; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem; }
-        .subtitle-badge { font-size: 0.8rem; font-weight: normal; color: #94a3b8; background: #1e293b; padding: 0.25rem 0.65rem; border-radius: 999px; border: 1px solid #334155; }
-        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 1.15rem; margin-top: 1rem; }
-        .card { background: #1e293b; padding: 1.15rem; border-radius: 8px; border: 1px solid #334155; }
-        .card h3 { margin: 0 0 0.6rem 0; font-size: 0.8rem; text-transform: uppercase; color: #94a3b8; letter-spacing: 0.05em; }
-        .metric { font-size: 1.55rem; font-weight: bold; color: #f97316; }
-        .metric-sub { font-size: 0.8rem; color: #94a3b8; margin-top: 0.35rem; line-height: 1.45; }
-        .status-healthy { color: #22c55e; }
-        .status-warn { color: #eab308; }
-        .status-crit { color: #ef4444; }
-        .status-info { color: #38bdf8; }
-        .progress-track { width: 100%; height: 6px; background: #0f172a; border-radius: 999px; overflow: hidden; margin-top: 0.5rem; }
-        .progress-bar { height: 100%; border-radius: 999px; transition: width 0.3s ease; }
-        .bg-healthy { background: #22c55e; }
-        .bg-warn { background: #eab308; }
-        .bg-crit { background: #ef4444; }
-        .bg-info { background: #38bdf8; }
-        .table-wrap { margin-top: 1.1rem; overflow-x: auto; }
-        table.breakdown-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
-        table.breakdown-table th { text-align: left; color: #94a3b8; font-weight: 600; text-transform: uppercase; font-size: 0.72rem; letter-spacing: 0.04em; padding: 0.6rem 0.75rem; border-bottom: 1px solid #334155; background: #162238; white-space: nowrap; }
-        table.breakdown-table td { padding: 0.6rem 0.75rem; border-bottom: 1px solid #1e293b; color: #e2e8f0; vertical-align: middle; }
-        table.breakdown-table tr:last-child td { border-bottom: none; }
-        table.breakdown-table tr:hover td { background: rgba(30, 41, 59, 0.55); }
-        .tag { display: inline-block; font-size: 0.71rem; padding: 0.12rem 0.45rem; border-radius: 4px; background: #0f172a; color: #38bdf8; border: 1px solid #1e3a5f; margin-left: 0.4rem; white-space: nowrap; }
-        .tag-green { background: rgba(34, 197, 94, 0.12); color: #4ade80; border-color: rgba(34, 197, 94, 0.35); }
-        .tag-amber { background: rgba(234, 179, 8, 0.12); color: #facc15; border-color: rgba(234, 179, 8, 0.35); }
-        .tag-red { background: rgba(239, 68, 68, 0.12); color: #f87171; border-color: rgba(239, 68, 68, 0.35); }
-        .tag-purple { background: rgba(168, 85, 247, 0.14); color: #c084fc; border-color: rgba(168, 85, 247, 0.35); }
-        .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; font-size: 0.82rem; }
-        #system-meta { font-size: 0.92rem; color: #94a3b8; line-height: 1.6; }
-        .snooze-btn, .action-btn {
-            background: #0f172a;
-            color: #38bdf8;
-            border: 1px solid #1e3a5f;
+            font-weight: 500;
+            color: var(--text-muted);
+            background: transparent;
+            padding: 0.36rem 0.76rem;
             border-radius: 6px;
-            padding: 0.28rem 0.65rem;
-            font-size: 0.76rem;
+            border: 1px solid transparent;
+            text-decoration: none;
+            transition: background 0.15s ease, color 0.15s ease, border-color 0.15s ease;
+        }
+        .nav-pill:hover {
+            background: var(--bg-well);
+            color: var(--text-main);
+        }
+        .nav-pill.active,
+        .nav-pill.active:hover {
+            background: var(--accent-primary);
+            color: var(--accent-fg);
+            border-color: var(--accent-primary);
+            font-weight: 600;
+        }
+        /* Outer Section Panels (Single 8% Hairline Contour, Zero Rest Shadows) */
+        .domain-section {
+            margin-bottom: 1.35rem;
+            background: var(--bg-card);
+            padding: 1.45rem 1.65rem;
+            border-radius: var(--radius-panel);
+            border: 1px solid var(--border-hairline);
+            box-shadow: none;
+            min-width: 0;
+            max-width: 100%;
+            transition: border-color 0.18s ease;
+        }
+        .domain-section.domain-section-crit {
+            border-color: rgba(239, 68, 68, 0.42);
+        }
+        .domain-title {
+            font-family: var(--font-head);
+            font-size: 1.14rem;
+            color: var(--text-main);
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            margin: 0 0 1.05rem 0;
+            border-bottom: none;
+            padding-bottom: 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.6rem;
+        }
+        .subsection-title {
+            font-family: var(--font-head);
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+            margin: 1.55rem 0 0.7rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .subtitle-badge {
+            font-family: var(--font-mono);
+            font-size: 0.75rem;
+            font-weight: 500;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--text-muted);
+            background: var(--bg-well);
+            padding: 0.24rem 0.68rem;
+            border-radius: 999px;
+            border: 1px solid var(--border-hairline);
+            max-width: 100%;
+            overflow-wrap: anywhere;
+            line-height: 1.4;
+        }
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 215px), 1fr));
+            gap: 0.9rem;
+            margin-top: 0.85rem;
+        }
+        /* Borderless Recessed Metric Wells */
+        .card {
+            background: var(--bg-well);
+            padding: 1.05rem 1.2rem;
+            border-radius: var(--radius-well);
+            border: 1px solid transparent;
+            min-width: 0;
+            transition: background 0.15s ease, border-color 0.15s ease;
+        }
+        .card:hover {
+            border-color: var(--border-hairline);
+        }
+        .card h3 {
+            margin: 0 0 0.5rem 0;
+            font-family: var(--font-body);
+            font-size: 0.74rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: var(--text-muted);
+            letter-spacing: 0.055em;
+        }
+        .metric {
+            font-family: var(--font-head);
+            font-size: 1.62rem;
+            font-weight: 600;
+            letter-spacing: -0.03em;
+            line-height: 1.15;
+            font-variant-numeric: tabular-nums;
+            color: var(--text-main);
+        }
+        .metric.metric-compact {
+            font-size: 1.1rem;
+            letter-spacing: -0.015em;
+            color: var(--text-main);
+        }
+        .metric-sub {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+            margin-top: 0.42rem;
+            line-height: 1.48;
+            font-variant-numeric: tabular-nums;
+        }
+        .metric-sub strong {
+            color: var(--text-secondary);
+            font-weight: 600;
+        }
+        .metric-sub-spaced {
+            margin-top: 0.48rem;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.32rem;
+        }
+        .metric-sub-spaced .tag {
+            margin-left: 0;
+        }
+        .muted-text {
+            color: var(--text-muted);
+        }
+        .empty-note {
+            color: var(--text-muted);
+            margin: 0.5rem 0 0 0;
+            font-size: 0.88rem;
+            line-height: 1.55;
+        }
+        .status-healthy { color: var(--status-healthy); }
+        .status-warn { color: var(--status-warn); }
+        .status-crit { color: var(--status-crit); }
+        .status-info { color: var(--status-info); }
+        .progress-track {
+            width: 100%;
+            height: 4px;
+            background: rgba(255, 255, 255, 0.08);
+            border-radius: 999px;
+            overflow: hidden;
+            margin-top: 0.62rem;
+        }
+        .progress-bar {
+            height: 100%;
+            border-radius: 999px;
+            transition: width 0.3s ease;
+        }
+        .bg-healthy { background: var(--status-healthy-bar); }
+        .bg-warn { background: var(--status-warn-bar); }
+        .bg-crit { background: var(--status-crit-bar); }
+        .bg-info { background: #e4e4e7; }
+        /* Clean Hairline Tables */
+        .table-wrap {
+            margin-top: 1.1rem;
+            overflow-x: auto;
+            border: 1px solid var(--border-hairline);
+            border-radius: var(--radius-well);
+            background: var(--bg-card);
+            -webkit-overflow-scrolling: touch;
+        }
+        table.breakdown-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.84rem;
+            font-variant-numeric: tabular-nums;
+        }
+        table.breakdown-table th {
+            text-align: left;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+            font-size: 0.71rem;
+            letter-spacing: 0.055em;
+            padding: 0.68rem 0.85rem;
+            border-bottom: 1px solid var(--border-hairline);
+            background: var(--bg-well);
+            white-space: nowrap;
+        }
+        table.breakdown-table td {
+            padding: 0.68rem 0.85rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-secondary);
+            vertical-align: middle;
+        }
+        table.breakdown-table td strong {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        table.breakdown-table td.status-healthy { color: var(--status-healthy); }
+        table.breakdown-table td.status-warn { color: var(--status-warn); }
+        table.breakdown-table td.status-crit { color: var(--status-crit); }
+        table.breakdown-table td.status-info { color: var(--status-info); }
+        table.breakdown-table td.status-healthy strong,
+        table.breakdown-table td.status-warn strong,
+        table.breakdown-table td.status-crit strong,
+        table.breakdown-table td.status-info strong { color: inherit; }
+        table.breakdown-table tr:last-child td {
+            border-bottom: none;
+        }
+        table.breakdown-table tr:hover td {
+            background: rgba(255, 255, 255, 0.025);
+        }
+        /* Quiet Swiss Tags & Surgical Semantic Pills */
+        .tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.32rem;
+            font-family: var(--font-mono);
+            font-size: 0.71rem;
+            font-weight: 500;
+            padding: 0.15rem 0.52rem;
+            border-radius: 5px;
+            background: var(--bg-well-hover);
+            color: var(--text-secondary);
+            border: none;
+            margin-left: 0.4rem;
+            white-space: nowrap;
+            line-height: 1.35;
+        }
+        .tag-inline {
+            margin-left: 0;
+        }
+        .tag-green {
+            background: var(--status-healthy-bg);
+            color: var(--status-healthy);
+        }
+        .tag-amber {
+            background: var(--status-warn-bg);
+            color: var(--status-warn);
+        }
+        .tag-red {
+            background: var(--status-crit-bg);
+            color: var(--status-crit-pill);
+        }
+        .tag-purple {
+            background: rgba(255, 255, 255, 0.10);
+            color: var(--text-main);
+        }
+        .tag-snooze {
+            margin-left: 0;
+            background: var(--bg-well-hover);
+            color: var(--text-main);
+            border: 1px solid var(--border-control);
+        }
+        .mono {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            font-variant-numeric: tabular-nums;
+        }
+        .ai-md-strong {
+            color: var(--text-main);
+            font-weight: 600;
+        }
+        .ai-md-code {
+            background: var(--bg-well);
+            padding: 0.1rem 0.38rem;
+            border-radius: 4px;
+            color: var(--text-main);
+            border: 1px solid var(--border-hairline);
+        }
+        #system-meta {
+            font-family: var(--font-mono);
+            font-size: 0.82rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            font-variant-numeric: tabular-nums;
+        }
+        /* Swiss Outlined & Inverted Monochrome Controls */
+        .snooze-btn, .action-btn {
+            background: var(--bg-well);
+            color: var(--text-secondary);
+            border: 1px solid var(--border-control);
+            border-radius: var(--radius-control);
+            padding: 0.38rem 0.78rem;
+            font-family: var(--font-body);
+            font-size: 0.78rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+        .snooze-btn {
+            padding: 0.25rem 0.58rem;
+            font-size: 0.74rem;
+            font-family: var(--font-mono);
         }
         .snooze-btn:hover, .action-btn:hover {
-            background: #0284c7;
-            color: #ffffff;
-            border-color: #38bdf8;
-            box-shadow: 0 0 8px rgba(56, 189, 248, 0.4);
+            background: var(--bg-well-hover);
+            color: var(--text-main);
+            border-color: var(--border-strong);
+        }
+        .action-btn.action-btn-primary {
+            background: var(--accent-primary);
+            color: var(--accent-fg);
+            border-color: var(--accent-primary);
+        }
+        .action-btn.action-btn-primary:hover {
+            background: var(--accent-hover);
+            color: var(--accent-fg);
+            border-color: var(--accent-hover);
         }
         .action-btn:disabled {
             opacity: 0.55;
             cursor: wait;
         }
         .unsnooze-btn {
-            background: #0f172a;
-            color: #f87171;
-            border: 1px solid #7f1d1d;
+            background: var(--status-crit-bg);
+            color: var(--status-crit-pill);
+            border: 1px solid rgba(239, 68, 68, 0.30);
             border-radius: 6px;
-            padding: 0.22rem 0.55rem;
+            padding: 0.24rem 0.58rem;
+            font-family: var(--font-body);
             font-size: 0.74rem;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.15s ease;
+            transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+        }
+        .unsnooze-btn.unsnooze-btn-sm {
+            font-size: 0.71rem;
+            padding: 0.16rem 0.5rem;
         }
         .unsnooze-btn:hover {
-            background: #dc2626;
+            background: rgba(239, 68, 68, 0.28);
             color: #ffffff;
-            border-color: #f87171;
-            box-shadow: 0 0 8px rgba(248, 113, 113, 0.4);
+            border-color: rgba(239, 68, 68, 0.55);
         }
+        /* Anomaly, Snooze & Callout Containers */
+        .anomalies-list {
+            margin-top: 0.95rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        .anomalies-bulk-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 0.35rem;
+            flex-wrap: wrap;
+            margin-bottom: 0.15rem;
+        }
+        .anomaly-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.55rem 0.85rem;
+            background: var(--bg-well);
+            padding: 0.62rem 0.85rem;
+            border-radius: var(--radius-well);
+            border: 1px solid var(--border-hairline);
+            font-size: 0.85rem;
+        }
+        .anomaly-main {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            gap: 0.35rem 0.45rem;
+            min-width: 0;
+        }
+        .anomaly-controls {
+            display: flex;
+            gap: 0.28rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        .snooze-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            margin-right: 0.2rem;
+        }
+        .snoozed-box {
+            margin-top: 0.95rem;
+            background: var(--bg-well);
+            border: 1px dashed var(--border-control);
+            border-radius: var(--radius-well);
+            padding: 0.72rem 0.9rem;
+        }
+        .snoozed-box-header {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .snoozed-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.45rem;
+        }
+        .snoozed-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.45rem 0.75rem;
+            font-size: 0.84rem;
+        }
+        .snoozed-expiry {
+            color: var(--text-muted);
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
+        }
+        .callout-dashed {
+            margin-top: 1rem;
+            padding: 0.82rem 1rem;
+            background: var(--bg-well);
+            border: 1px dashed var(--border-control);
+            border-radius: var(--radius-well);
+            font-size: 0.84rem;
+            color: var(--text-secondary);
+            line-height: 1.55;
+        }
+        .callout-dashed strong {
+            color: var(--text-main);
+        }
+        /* Interactive Ask AI Analyst Bar & Replies */
         .ask-bar {
             display: flex;
             gap: 0.5rem;
-            margin-top: 0.85rem;
+            margin-top: 0.95rem;
             flex-wrap: wrap;
         }
         .ask-input {
             flex: 1;
             min-width: 240px;
-            background: #0b1329;
-            border: 1px solid #1e3a5f;
-            color: #f8fafc;
-            border-radius: 6px;
-            padding: 0.5rem 0.75rem;
+            background: var(--bg-page);
+            border: 1px solid var(--border-control);
+            color: var(--text-main);
+            border-radius: var(--radius-control);
+            padding: 0.52rem 0.82rem;
+            font-family: var(--font-body);
             font-size: 0.86rem;
             outline: none;
+            transition: border-color 0.15s ease, box-shadow 0.15s ease;
+        }
+        .ask-input::placeholder {
+            color: var(--text-muted);
         }
         .ask-input:focus {
-            border-color: #38bdf8;
-            box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.2);
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(250, 250, 250, 0.14);
+        }
+        .ask-loading-box {
+            margin-top: 0.75rem;
+            padding: 0.7rem 0.9rem;
+            background: var(--bg-page);
+            border: 1px solid var(--border-hairline);
+            border-radius: var(--radius-well);
+            color: var(--text-muted);
+            font-size: 0.85rem;
+        }
+        .ask-reply-box {
+            margin-top: 0.75rem;
+            padding: 0.85rem 1rem;
+            background: var(--bg-page);
+            border: 1px solid var(--border-control);
+            border-radius: var(--radius-well);
+            font-size: 0.88rem;
+            line-height: 1.58;
+        }
+        .ask-reply-meta {
+            font-family: var(--font-mono);
+            font-size: 0.76rem;
+            color: var(--text-muted);
+            margin-bottom: 0.45rem;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 0.4rem;
+        }
+        .ask-reply-meta strong {
+            color: var(--text-main);
+        }
+        .ask-reply-body {
+            white-space: pre-wrap;
+            color: var(--text-secondary);
+        }
+        .ask-error-box {
+            margin-top: 0.75rem;
+            padding: 0.65rem 0.85rem;
+            background: var(--status-crit-bg);
+            border: 1px solid rgba(239, 68, 68, 0.30);
+            border-radius: var(--radius-well);
+            color: var(--status-crit-pill);
+            font-size: 0.85rem;
         }
         /* Foldable Autonomous NOC Assessment Card */
         .assessment-collapsible {
             margin-top: 1rem;
-            background: #0f172a;
-            border: 1px solid #1e3a5f;
-            border-radius: 8px;
+            background: var(--bg-well);
+            border: 1px solid var(--border-hairline);
+            border-radius: var(--radius-well);
             overflow: hidden;
-            transition: border-color 0.2s ease;
+            transition: border-color 0.18s ease;
         }
         .assessment-collapsible:hover {
-            border-color: rgba(56, 189, 248, 0.55);
+            border-color: var(--border-control);
         }
         .assessment-toggle-header {
             width: 100%;
@@ -175,41 +694,58 @@
             gap: 0.75rem;
             flex-wrap: wrap;
             padding: 0.85rem 1.1rem;
-            background: rgba(22, 34, 56, 0.65);
+            background: transparent;
             border: none;
-            color: #f8fafc;
+            color: var(--text-main);
             cursor: pointer;
             text-align: left;
             font-family: inherit;
+            transition: background 0.15s ease;
         }
         .assessment-toggle-header:hover {
-            background: rgba(30, 41, 59, 0.85);
+            background: rgba(255, 255, 255, 0.03);
         }
         .assessment-toggle-title {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 0.55rem;
-            font-size: 0.84rem;
-            font-weight: 700;
+            font-size: 0.83rem;
+            font-weight: 600;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            color: #cbd5e1;
+            letter-spacing: 0.055em;
+            color: var(--text-main);
+        }
+        .assessment-hint {
+            font-weight: 400;
+            text-transform: none;
+            letter-spacing: 0;
+            color: var(--text-muted);
+            font-size: 0.79rem;
         }
         .assessment-chevron {
             display: inline-flex;
             align-items: center;
             gap: 0.3rem;
-            font-size: 0.76rem;
+            font-family: var(--font-mono);
+            font-size: 0.74rem;
             font-weight: 600;
-            color: #38bdf8;
-            background: #0b1329;
-            border: 1px solid #1e3a5f;
+            color: var(--text-secondary);
+            background: var(--bg-card);
+            border: 1px solid var(--border-control);
             border-radius: 999px;
-            padding: 0.2rem 0.65rem;
+            padding: 0.22rem 0.68rem;
         }
         .assessment-body {
-            padding: 1rem 1.15rem 1.15rem 1.15rem;
-            border-top: 1px solid #1e293b;
+            padding: 1.05rem 1.15rem 1.15rem 1.15rem;
+            border-top: 1px solid var(--border-hairline);
+            background: rgba(9, 9, 11, 0.36);
+        }
+        .assessment-prose {
+            white-space: pre-wrap;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            color: var(--text-secondary);
         }
         .assessment-body.folded {
             display: none;
@@ -219,6 +755,9 @@
             padding: 0;
             overflow: hidden;
         }
+        .ai-analyst-collapsible:hover {
+            border-color: var(--border-control);
+        }
         .ai-analyst-toggle-header {
             width: 100%;
             display: flex;
@@ -226,56 +765,68 @@
             align-items: center;
             flex-wrap: wrap;
             gap: 0.65rem;
-            padding: 1.1rem 1.5rem;
+            padding: 1.1rem 1.55rem;
             background: transparent;
             border: none;
-            color: #38bdf8;
+            color: var(--text-main);
             cursor: pointer;
             text-align: left;
             font-family: inherit;
-            transition: background 0.18s ease;
+            transition: background 0.16s ease;
         }
         .ai-analyst-toggle-header:hover {
-            background: rgba(56, 189, 248, 0.06);
+            background: rgba(255, 255, 255, 0.025);
         }
         .ai-analyst-title-group {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
-            gap: 0.5rem;
+            gap: 0.55rem;
         }
         .ai-analyst-title-text {
-            font-size: 1.32rem;
-            font-weight: 700;
-            color: #38bdf8;
+            font-family: var(--font-head);
+            font-size: 1.16rem;
+            font-weight: 600;
+            letter-spacing: -0.015em;
+            color: var(--text-main);
         }
         .ai-analyst-header-right {
             display: flex;
             align-items: center;
             flex-wrap: wrap;
             gap: 0.5rem;
+            max-width: 100%;
         }
         .ai-analyst-body {
-            padding: 0 1.5rem 1.5rem 1.5rem;
-            border-top: 1px solid #1e293b;
+            padding: 0.3rem 1.55rem 1.55rem 1.55rem;
+            border-top: 1px solid var(--border-hairline);
         }
         .ai-analyst-body.folded {
             display: none;
         }
+        .ai-kpi-grid {
+            grid-template-columns: repeat(auto-fit, minmax(min(100%, 220px), 1fr));
+        }
         /* Responsive Mobile Navigation & Layout (<= 768px) */
         @media (max-width: 768px) {
             body {
-                margin: 0.9rem;
+                padding: 14px 14px 48px 14px;
             }
             h1 {
-                font-size: 1.35rem;
+                font-size: 1.28rem;
             }
             h2 {
-                font-size: 1.15rem;
-                margin-top: 2rem;
+                font-size: 1.05rem;
+                margin-top: 1.9rem;
+            }
+            .top-bar {
+                padding: 0.8rem 0.95rem;
             }
             .domain-section {
-                padding: 1rem;
+                padding: 1rem 1.05rem;
+            }
+            .subtitle-badge {
+                border-radius: 8px;
             }
             .ai-analyst-collapsible {
                 padding: 0;
@@ -284,25 +835,26 @@
                 padding: 0.9rem 1rem;
             }
             .ai-analyst-title-text {
-                font-size: 1.05rem;
+                font-size: 1.04rem;
             }
             .ai-analyst-meta-badge {
-                font-size: 0.72rem;
+                font-size: 0.71rem;
             }
             .ai-analyst-body {
-                padding: 0 1rem 1rem 1rem;
+                padding: 0.2rem 1rem 1rem 1rem;
             }
             .ask-input {
                 min-width: 0;
                 width: 100%;
             }
             .nav-pills {
-                top: 0.5rem;
+                top: 0;
                 width: 100%;
                 padding: 0;
-                border-radius: 14px;
-                background: rgba(15, 23, 42, 0.92);
-                border-color: rgba(56, 189, 248, 0.32);
+                border-radius: 0 0 var(--radius-panel) var(--radius-panel);
+                background: rgba(17, 17, 19, 0.96);
+                border-color: var(--border-control);
+                border-top-color: transparent;
                 overflow: hidden;
             }
             .mobile-nav-toggle {
@@ -314,7 +866,7 @@
                 padding: 0.65rem 0.9rem;
                 background: transparent;
                 border: none;
-                color: #f8fafc;
+                color: var(--text-main);
                 font-family: inherit;
                 font-size: 0.86rem;
                 font-weight: 600;
@@ -322,7 +874,7 @@
                 text-align: left;
             }
             .mobile-nav-toggle:hover {
-                background: rgba(30, 41, 59, 0.55);
+                background: rgba(255, 255, 255, 0.04);
             }
             .mobile-nav-toggle-left {
                 display: flex;
@@ -331,18 +883,18 @@
                 min-width: 0;
             }
             .mobile-nav-icon {
-                color: #38bdf8;
+                color: var(--text-main);
                 font-size: 1rem;
                 line-height: 1;
             }
             .mobile-nav-current {
                 font-size: 0.75rem;
                 font-weight: 600;
-                color: #38bdf8;
-                background: rgba(56, 189, 248, 0.14);
-                border: 1px solid rgba(56, 189, 248, 0.35);
+                color: var(--text-main);
+                background: var(--bg-well);
+                border: 1px solid var(--border-control);
                 border-radius: 999px;
-                padding: 0.12rem 0.55rem;
+                padding: 0.14rem 0.58rem;
                 max-width: 44vw;
                 overflow: hidden;
                 text-overflow: ellipsis;
@@ -350,11 +902,12 @@
             }
             .mobile-nav-chevron {
                 flex-shrink: 0;
-                font-size: 0.76rem;
+                font-family: var(--font-mono);
+                font-size: 0.74rem;
                 font-weight: 600;
-                color: #38bdf8;
-                background: #0b1329;
-                border: 1px solid #1e3a5f;
+                color: var(--text-secondary);
+                background: var(--bg-well);
+                border: 1px solid var(--border-control);
                 border-radius: 999px;
                 padding: 0.2rem 0.65rem;
             }
@@ -369,7 +922,7 @@
                 align-items: stretch;
                 gap: 6px;
                 padding: 8px 10px;
-                border-top: 1px solid rgba(56, 189, 248, 0.2);
+                border-top: 1px solid var(--border-hairline);
                 overflow-y: auto;
                 overscroll-behavior: contain;
                 -webkit-overflow-scrolling: touch;
@@ -383,7 +936,7 @@
                 box-sizing: border-box;
                 min-height: 38px;
                 padding: 0.45rem 0.78rem;
-                border-radius: 10px;
+                border-radius: var(--radius-control);
                 font-size: 0.85rem;
                 scroll-snap-align: start;
             }
@@ -392,10 +945,20 @@
                 justify-content: space-between;
                 align-items: center;
                 padding: 0.38rem 0.9rem 0.45rem;
-                font-size: 0.74rem;
-                color: #94a3b8;
-                border-top: 1px solid rgba(56, 189, 248, 0.16);
-                background: rgba(11, 19, 41, 0.72);
+                font-family: var(--font-mono);
+                font-size: 0.73rem;
+                color: var(--text-muted);
+                border-top: 1px solid var(--border-hairline);
+                background: rgba(9, 9, 11, 0.72);
+            }
+        }
+        @media (max-width: 480px) {
+            .anomalies-bulk-row {
+                justify-content: flex-start;
+            }
+            .anomalies-bulk-row .snooze-btn {
+                padding: 0.24rem 0.5rem;
+                font-size: 0.72rem;
             }
         }
         /* Mini latency sparkline bars for ESP-32S 24h history */
@@ -415,28 +978,33 @@
             transition: opacity 0.15s;
         }
         .spark-bar:hover {
-            opacity: 0.8;
+            opacity: 0.78;
         }
         .core-pills {
             display: flex;
             gap: 0.35rem;
             flex-wrap: wrap;
-            margin-top: 0.45rem;
+            margin-top: 0.5rem;
         }
         .core-pill {
+            font-family: var(--font-mono);
             font-size: 0.72rem;
-            padding: 0.12rem 0.42rem;
-            border-radius: 4px;
-            background: #0f172a;
-            border: 1px solid #334155;
-            color: #cbd5e1;
+            padding: 0.14rem 0.46rem;
+            border-radius: 5px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-hairline);
+            color: var(--text-secondary);
+            font-variant-numeric: tabular-nums;
+        }
+        .core-pill strong {
+            color: var(--text-main);
         }
     </style>
 </head>
 <body>
     <h1>
-        <span>☁️ Cloudflare, Raspberry Pi 5 &amp; ESP-32S Network Operations Center</span>
-        <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+        <span>☁️ Cloudflare, Raspberry Pi 5 &amp; ESP&#8209;32S Network Operations Center</span>
+        <div class="header-badges">
             <span id="telegram-badge" class="subtitle-badge">📨 Telegram: Checking...</span>
             <span id="access-badge" class="subtitle-badge">🔒 Cloudflare Access Protected</span>
         </div>
@@ -511,7 +1079,7 @@
     <div id="rpi5-container"></div>
 
     <!-- 4. ESP-32S Out-of-Band Hardware Watchdog Monitor -->
-    <h2 id="sec-esp32">📡 ESP-32S Out-of-Band Watchdog Monitor</h2>
+    <h2 id="sec-esp32">📡 ESP&#8209;32S Out-of-Band Watchdog Monitor</h2>
     <div id="esp32-container"></div>
 
     <script>
@@ -713,6 +1281,13 @@
             return 'status-healthy';
         }
 
+        function getThresholdProgressClass(val, warn, crit) {
+            if (val === null || val === undefined) return 'bg-info';
+            if (val >= crit) return 'bg-crit';
+            if (val >= warn) return 'bg-warn';
+            return 'bg-healthy';
+        }
+
         function clampPct(pct) {
             return Math.min(100, Math.max(0, Number(pct) || 0));
         }
@@ -724,7 +1299,7 @@
             const utcMs = Date.UTC(+m[1], +m[2] - 1, +m[3], +m[4], +m[5], +m[6]);
             const gmt4 = new Date(utcMs - 4 * 3600 * 1000);
             const pad = (n) => String(n).padStart(2, '0');
-            const gmt4Time = `${pad(gmt4.getUTCHours())}:${pad(gmt4.getUTCMinutes())}:${pad(gmt4.getUTCSeconds())} GMT-4`;
+            const gmt4Time = `${pad(gmt4.getUTCHours())}:${pad(gmt4.getUTCMinutes())}:${pad(gmt4.getUTCSeconds())} GMT\u20114`;
             return `${utcStr} (${gmt4Time})`;
         }
 
@@ -744,8 +1319,8 @@
             .replace(/'/g, '&#39;');
 
         const formatAiMarkdown = (raw) => escapeHtml(raw)
-            .replace(/\*\*([^*]+)\*\*/g, '<strong style="color:#f8fafc;">$1</strong>')
-            .replace(/`([^`]+)`/g, '<code class="mono" style="background:#0f172a; padding:0.1rem 0.35rem; border-radius:4px; color:#38bdf8; border:1px solid #1e3a5f;">$1</code>');
+            .replace(/\*\*([^*]+)\*\*/g, '<strong class="ai-md-strong">$1</strong>')
+            .replace(/`([^`]+)`/g, '<code class="mono ai-md-code">$1</code>');
 
         async function updateDashboard(forceRefresh = false) {
             try {
@@ -796,7 +1371,7 @@
 
                 const domainEntries = Object.entries(data.domains || {});
                 if (domainEntries.length === 0) {
-                    domainsContainer.innerHTML = '<div class="domain-section"><p style="color:#94a3b8; margin:0;">No monitored domains found in metrics payload.</p></div>';
+                    domainsContainer.innerHTML = '<div class="domain-section"><p class="empty-note">No monitored domains found in metrics payload.</p></div>';
                 }
 
                 for (const [domainName, metrics] of domainEntries) {
@@ -924,7 +1499,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${scriptsRowsHtml || '<tr><td colspan="6" style="color:#94a3b8">No Worker or Pages scripts detected.</td></tr>'}
+                                    ${scriptsRowsHtml || '<tr><td colspan="6" class="muted-text">No Worker or Pages scripts detected.</td></tr>'}
                                 </tbody>
                             </table>
                         </div>
@@ -953,7 +1528,7 @@
                 (ai.models || []).forEach(m => {
                     aiModelsHtml += `
                         <tr>
-                            <td><strong>${escapeHtml(m.model_id)}</strong></td>
+                            <td><strong class="mono">${escapeHtml(m.model_id)}</strong></td>
                             <td>${(m.requests_today ?? 0).toLocaleString()}</td>
                             <td>${(m.requests_mtd ?? 0).toLocaleString()}</td>
                             <td>${(m.neurons_mtd ?? 0).toLocaleString()}</td>
@@ -1012,7 +1587,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${aiModelsHtml || '<tr><td colspan="7" style="color:#94a3b8">No Workers AI model invocations recorded this month.</td></tr>'}
+                                    ${aiModelsHtml || '<tr><td colspan="7" class="muted-text">No Workers AI model invocations recorded this month.</td></tr>'}
                                 </tbody>
                             </table>
                         </div>
@@ -1033,7 +1608,7 @@
                     const pctClass = getQuotaClass(db.capacity_pct ?? 0);
                     d1RowsHtml += `
                         <tr>
-                            <td><strong>${escapeHtml(db.name)}</strong> <span style="color:#94a3b8">(${escapeHtml((db.uuid || '').substring(0, 8))})</span></td>
+                            <td><strong>${escapeHtml(db.name)}</strong> <span class="mono muted-text">(${escapeHtml((db.uuid || '').substring(0, 8))})</span></td>
                             <td>${db.file_size_mb ?? 0} MB <span class="${pctClass}">(${db.capacity_pct ?? 0}% of 500 MB)</span></td>
                             <td>${(db.rows_read_today ?? 0).toLocaleString()}</td>
                             <td>${(db.rows_written_today ?? 0).toLocaleString()}</td>
@@ -1094,7 +1669,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${d1RowsHtml || '<tr><td colspan="7" style="color:#94a3b8">No managed D1 storage matrices detected.</td></tr>'}
+                                    ${d1RowsHtml || '<tr><td colspan="7" class="muted-text">No managed D1 storage matrices detected.</td></tr>'}
                                 </tbody>
                             </table>
                         </div>
@@ -1185,7 +1760,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${doRowsHtml || '<tr><td colspan="8" style="color:#94a3b8">No Durable Object namespaces or invocations detected.</td></tr>'}
+                                    ${doRowsHtml || '<tr><td colspan="8" class="muted-text">No Durable Object namespaces or invocations detected.</td></tr>'}
                                 </tbody>
                             </table>
                         </div>
@@ -1205,7 +1780,7 @@
                 (kvb.namespaces || []).forEach(ns => {
                     kvRowsHtml += `
                         <tr>
-                            <td><strong>${escapeHtml(ns.title)}</strong> <span style="color:#94a3b8">(${escapeHtml((ns.namespace_id || '').substring(0, 8))})</span></td>
+                            <td><strong>${escapeHtml(ns.title)}</strong> <span class="mono muted-text">(${escapeHtml((ns.namespace_id || '').substring(0, 8))})</span></td>
                             <td>${(ns.reads_today ?? 0).toLocaleString()} R / ${(ns.writes_today ?? 0).toLocaleString()} W</td>
                             <td>${(ns.reads_mtd ?? 0).toLocaleString()}</td>
                             <td>${(ns.writes_mtd ?? 0).toLocaleString()}</td>
@@ -1262,7 +1837,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${kvRowsHtml || '<tr><td colspan="7" style="color:#94a3b8">No Workers KV namespaces or operations detected.</td></tr>'}
+                                    ${kvRowsHtml || '<tr><td colspan="7" class="muted-text">No Workers KV namespaces or operations detected.</td></tr>'}
                                 </tbody>
                             </table>
                         </div>
@@ -1281,7 +1856,7 @@
                     r2RowsHtml += `
                         <tr>
                             <td><strong>${escapeHtml(b.name)}</strong></td>
-                            <td>${b.payload_size_mb ?? 0} MB <span style="color:#94a3b8">(+${b.metadata_size_mb ?? 0} MB meta)</span></td>
+                            <td>${b.payload_size_mb ?? 0} MB <span class="muted-text">(+${b.metadata_size_mb ?? 0} MB meta)</span></td>
                             <td>${(b.object_count ?? 0).toLocaleString()}</td>
                             <td>${(b.class_a_ops_today ?? 0).toLocaleString()} A / ${(b.class_b_ops_today ?? 0).toLocaleString()} B</td>
                             <td>${(b.class_a_ops_mtd ?? 0).toLocaleString()}</td>
@@ -1336,7 +1911,7 @@
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    ${r2RowsHtml || '<tr><td colspan="7" style="color:#94a3b8">No R2 buckets or object storage operations detected.</td></tr>'}
+                                    ${r2RowsHtml || '<tr><td colspan="7" class="muted-text">No R2 buckets or object storage operations detected.</td></tr>'}
                                 </tbody>
                             </table>
                         </div>
@@ -1353,7 +1928,7 @@
                 document.getElementById('daemon-health').className = "status-crit";
                 const domainsContainer = document.getElementById('domains-container');
                 if (!domainsContainer.innerHTML.trim()) {
-                    domainsContainer.innerHTML = '<div class="domain-section"><p class="status-crit" style="margin:0;">Unable to load metrics.json from Cloudflare Worker. Verify CLOUDFLARE_API_TOKEN is configured.</p></div>';
+                    domainsContainer.innerHTML = '<div class="domain-section domain-section-crit"><p class="status-crit" style="margin:0;">Unable to load metrics.json from Cloudflare Worker. Verify CLOUDFLARE_API_TOKEN is configured.</p></div>';
                 }
             }
         }
@@ -1362,14 +1937,14 @@
             const container = document.getElementById('rpi5-container');
             if (!rpi5) {
                 container.innerHTML = `
-                    <div class="domain-section" style="border-color:#334155;">
+                    <div class="domain-section">
                         <div class="domain-title">
                             <span>Raspberry Pi 5 Edge Node (15-Min Cron Agent)</span>
                             <span class="subtitle-badge">⏳ Awaiting Initial Cron Push</span>
                         </div>
-                        <p style="color:#94a3b8; margin:0.75rem 0 0 0;">
-                            No telemetry received yet from <code class="mono">/opt/noc-agent/rpi5_noc_reporter.py</code>.
-                            Once the 15-minute cron reporter pushes to <code class="mono">https://noc-hook.tsimon.me/api/ingest/rpi5</code>,
+                        <p class="empty-note">
+                            No telemetry received yet from <code class="mono ai-md-code">/opt/noc-agent/rpi5_noc_reporter.py</code>.
+                            Once the 15-minute cron reporter pushes to <code class="mono ai-md-code">https://noc-hook.tsimon.me/api/ingest/rpi5</code>,
                             all system vitals, Qdrant status, Brain sync state, and critical services will appear here automatically.
                         </p>
                     </div>
@@ -1399,7 +1974,7 @@
 
             const storageRows = storage.map(fs => `
                 <tr>
-                    <td><strong class="mono">${escapeHtml(fs.mountpoint)}</strong> <span style="color:#94a3b8">(${escapeHtml(fs.device)})</span></td>
+                    <td><strong class="mono">${escapeHtml(fs.mountpoint)}</strong> <span class="mono muted-text">(${escapeHtml(fs.device)})</span></td>
                     <td>${escapeHtml(fs.fstype)}</td>
                     <td>${fs.used_gb} / ${fs.total_gb} GB</td>
                     <td>${fs.free_gb} GB</td>
@@ -1419,7 +1994,7 @@
                         <td class="mono">${escapeHtml((nic.ipv4 || []).join(', ') || '--')}</td>
                         <td class="mono">${escapeHtml(nic.mac || '--')}</td>
                         <td>↓ ${nic.rx_mb ?? 0} MB / ↑ ${nic.tx_mb ?? 0} MB</td>
-                        <td>${nic.rx_errors ?? 0} / ${nic.tx_errors ?? 0} <span style="color:#64748b">(drops ${nic.rx_drops ?? 0}/${nic.tx_drops ?? 0})</span></td>
+                        <td>${nic.rx_errors ?? 0} / ${nic.tx_errors ?? 0} <span class="muted-text">(drops ${nic.rx_drops ?? 0}/${nic.tx_drops ?? 0})</span></td>
                         <td>${wifiInfo}</td>
                     </tr>
                 `;
@@ -1427,27 +2002,27 @@
 
             const prefixTags = Object.entries(s.chunks_by_prefix || {})
                 .sort((a, b) => b[1] - a[1])
-                .map(([k, v]) => `<span class="tag">${escapeHtml(k)}: <strong>${Number(v).toLocaleString()}</strong></span>`)
+                .map(([k, v]) => `<span class="tag tag-inline">${escapeHtml(k)}: <strong>${Number(v).toLocaleString()}</strong></span>`)
                 .join('');
 
             const activeSvcCnt = services.filter(x => x.active).length;
             const critDownCnt = services.filter(x => x.critical && !x.active).length;
             const svcRows = services.map(svc => {
                 const stTag = svc.active
-                    ? '<span class="tag tag-green" style="margin-left:0">ACTIVE</span>'
-                    : (svc.critical ? '<span class="tag tag-red" style="margin-left:0">CRITICAL DOWN</span>' : '<span class="tag tag-amber" style="margin-left:0">INACTIVE</span>');
+                    ? '<span class="tag tag-green tag-inline">ACTIVE</span>'
+                    : (svc.critical ? '<span class="tag tag-red tag-inline">CRITICAL DOWN</span>' : '<span class="tag tag-amber tag-inline">INACTIVE</span>');
                 const typeTag = svc.type === 'docker'
                     ? '<span class="tag tag-purple">Docker</span>'
                     : (svc.type === 'timer' ? '<span class="tag">Timer</span>' : '<span class="tag">systemd</span>');
                 return `
                     <tr>
                         <td><strong>${escapeHtml(svc.display_name || svc.name)}</strong>${typeTag}${svc.critical ? '<span class="tag tag-amber">Critical</span>' : ''}</td>
-                        <td>${stTag} <span class="mono" style="color:#94a3b8; margin-left:0.3rem;">${escapeHtml(svc.status)}/${escapeHtml(svc.substate)}</span></td>
+                        <td>${stTag} <span class="mono muted-text">${escapeHtml(svc.status)}/${escapeHtml(svc.substate)}</span></td>
                         <td>${escapeHtml(svc.uptime_since || '--')}</td>
                         <td class="mono">${svc.pid ?? '--'}</td>
                         <td>${svc.rss_mb !== null && svc.rss_mb !== undefined ? svc.rss_mb + ' MB' : '--'}</td>
                         <td>${svc.restarts ?? 0}</td>
-                        <td style="color:#94a3b8">${escapeHtml(svc.health_detail || '--')}</td>
+                        <td class="muted-text">${escapeHtml(svc.health_detail || '--')}</td>
                     </tr>
                 `;
             }).join('');
@@ -1456,7 +2031,7 @@
             const syncCls = s.service_active && s.brain_uplink_ok ? 'status-healthy' : 'status-crit';
 
             container.innerHTML = `
-                <div class="domain-section" style="border-color:#22c55e;">
+                <div class="domain-section${critDownCnt > 0 ? ' domain-section-crit' : ''}">
                     <div class="domain-title">
                         <span>🍓 ${escapeHtml(h.hostname || 'rpi')} — ${escapeHtml(h.model || 'Raspberry Pi 5')} ${staleBadge}</span>
                         <span class="subtitle-badge">Uptime: ${escapeHtml(h.uptime_human || '--')} • ${escapeHtml(h.os_pretty || 'Debian')} • Reported: ${escapeHtml(formatSyncTimestamp(rpi5.reported_at_utc))}</span>
@@ -1471,14 +2046,14 @@
                             <h3>CPU Utilization (${c.cores ?? 4} Cores)</h3>
                             <div class="metric ${getThresholdClass(c.usage_pct, 80, 92)}">${c.usage_pct ?? 0}%</div>
                             <div class="metric-sub">${c.freq_mhz ?? 0} / ${c.max_freq_mhz ?? 2400} MHz • Gov: ${escapeHtml(c.governor || '--')}</div>
-                            <div class="progress-track"><div class="progress-bar ${getProgressClass(c.usage_pct ?? 0)}" style="width:${clampPct(c.usage_pct)}%"></div></div>
+                            <div class="progress-track"><div class="progress-bar ${getThresholdProgressClass(c.usage_pct ?? 0, 80, 92)}" style="width:${clampPct(c.usage_pct)}%"></div></div>
                             <div class="core-pills">${perCoreHtml}</div>
                         </div>
                         <div class="card">
                             <h3>Load Average (1m / 5m / 15m)</h3>
                             <div class="metric ${getThresholdClass(c.load_pct, 80, 95)}">${c.load_1m ?? 0} / ${c.load_5m ?? 0}</div>
                             <div class="metric-sub">15m: ${c.load_15m ?? 0} • ${c.load_pct ?? 0}% capacity • Procs: ${h.processes_running ?? 0}/${h.processes_total ?? 0}</div>
-                            <div class="progress-track"><div class="progress-bar ${getProgressClass(c.load_pct ?? 0)}" style="width:${clampPct(c.load_pct)}%"></div></div>
+                            <div class="progress-track"><div class="progress-bar ${getThresholdProgressClass(c.load_pct ?? 0, 80, 95)}" style="width:${clampPct(c.load_pct)}%"></div></div>
                         </div>
                         <div class="card">
                             <h3>Thermals, Fan &amp; Power</h3>
@@ -1495,13 +2070,13 @@
                                 ${(m.ram_used_mb ?? 0).toLocaleString()} / ${(m.ram_total_mb ?? 0).toLocaleString()} MB (Avail: ${(m.ram_available_mb ?? 0).toLocaleString()} MB)<br/>
                                 Swap: <strong>${m.swap_usage_pct ?? 0}%</strong> (${(m.swap_used_mb ?? 0).toLocaleString()} / ${(m.swap_total_mb ?? 0).toLocaleString()} MB)
                             </div>
-                            <div class="progress-track"><div class="progress-bar ${getProgressClass(m.ram_usage_pct ?? 0)}" style="width:${clampPct(m.ram_usage_pct)}%"></div></div>
+                            <div class="progress-track"><div class="progress-bar ${getThresholdProgressClass(m.ram_usage_pct ?? 0, 85, 93)}" style="width:${clampPct(m.ram_usage_pct)}%"></div></div>
                         </div>
                         <div class="card">
                             <h3>Root Storage (/)</h3>
                             <div class="metric ${getThresholdClass(rootFs.usage_pct, 80, 90)}">${rootFs.usage_pct ?? 0}%</div>
                             <div class="metric-sub">${rootFs.used_gb ?? 0} / ${rootFs.total_gb ?? 0} GB (${rootFs.free_gb ?? 0} GB free)${rootFs.inode_usage_pct !== null && rootFs.inode_usage_pct !== undefined ? ' • Inodes: ' + rootFs.inode_usage_pct + '%' : ''}</div>
-                            <div class="progress-track"><div class="progress-bar ${getProgressClass(rootFs.usage_pct ?? 0)}" style="width:${clampPct(rootFs.usage_pct)}%"></div></div>
+                            <div class="progress-track"><div class="progress-bar ${getThresholdProgressClass(rootFs.usage_pct ?? 0, 80, 90)}" style="width:${clampPct(rootFs.usage_pct)}%"></div></div>
                         </div>
                     </div>
 
@@ -1543,7 +2118,7 @@
                         <div class="card">
                             <h3>Total Synced Chunks (SQLite)</h3>
                             <div class="metric status-info">${(s.total_synced_chunks ?? 0).toLocaleString()}</div>
-                            <div class="metric-sub" style="margin-top:0.45rem;">${prefixTags || 'No chunks cached yet'}</div>
+                            <div class="metric-sub metric-sub-spaced">${prefixTags || 'No chunks cached yet'}</div>
                         </div>
                         <div class="card">
                             <h3>Last Qdrant Federation Pass</h3>
@@ -1578,7 +2153,7 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                ${svcRows || '<tr><td colspan="7" style="color:#94a3b8">No services reported.</td></tr>'}
+                                ${svcRows || '<tr><td colspan="7" class="muted-text">No services reported.</td></tr>'}
                             </tbody>
                         </table>
                     </div>
@@ -1598,7 +2173,7 @@
                                     <th>Inodes %</th>
                                 </tr>
                             </thead>
-                            <tbody>${storageRows || '<tr><td colspan="6" style="color:#94a3b8">No filesystems reported.</td></tr>'}</tbody>
+                            <tbody>${storageRows || '<tr><td colspan="6" class="muted-text">No filesystems reported.</td></tr>'}</tbody>
                         </table>
                     </div>
                     <div class="table-wrap">
@@ -1613,7 +2188,7 @@
                                     <th>Wi-Fi Link</th>
                                 </tr>
                             </thead>
-                            <tbody>${nicRows || '<tr><td colspan="6" style="color:#94a3b8">No network interfaces reported.</td></tr>'}</tbody>
+                            <tbody>${nicRows || '<tr><td colspan="6" class="muted-text">No network interfaces reported.</td></tr>'}</tbody>
                         </table>
                     </div>
                 </div>
@@ -1624,14 +2199,14 @@
             const container = document.getElementById('esp32-container');
             if (!esp32) {
                 container.innerHTML = `
-                    <div class="domain-section" style="border-color:#334155;">
+                    <div class="domain-section">
                         <div class="domain-title">
-                            <span>📡 ESP-32S Out-of-Band Hardware Watchdog</span>
+                            <span>📡 ESP&#8209;32S Out-of-Band Hardware Watchdog</span>
                             <span class="subtitle-badge">⏳ Awaiting Initial Ping Probe / Heartbeat</span>
                         </div>
-                        <p style="color:#94a3b8; margin:0.75rem 0 0 0;">
+                        <p class="empty-note">
                             Waiting for the Raspberry Pi 5 cron probe (ICMP ping, RTT, jitter, packet loss, MAC/ARP)
-                            or direct ESP-32S heartbeat push to <code class="mono">https://noc-hook.tsimon.me/api/ingest/esp32</code>.
+                            or direct ESP-32S heartbeat push to <code class="mono ai-md-code">https://noc-hook.tsimon.me/api/ingest/esp32</code>.
                         </p>
                     </div>
                 `;
@@ -1645,7 +2220,6 @@
 
             const isOnline = p.reachable !== false;
             const statusCls = isOnline ? 'status-healthy' : 'status-crit';
-            const borderCol = isOnline ? '#38bdf8' : '#ef4444';
 
             // Sparkline bars for last 24h ping samples
             let sparkHtml = '';
@@ -1700,9 +2274,9 @@
                 `;
             } else {
                 deviceCardsHtml = `
-                    <div style="margin-top:1rem; padding:0.75rem 0.95rem; background:#0b1329; border:1px dashed #334155; border-radius:8px; font-size:0.84rem; color:#94a3b8;">
+                    <div class="callout-dashed">
                         💡 <strong>Deep Device Telemetry Ready:</strong> Ping, latency, jitter, packet loss, MAC/ARP, and 24h availability are active now via RPi5 LAN probing.
-                        Flash the updated <code class="mono">esp32-monitor</code> firmware to unlock live <strong>Wi-Fi RSSI, SRAM heap, uptime, reset reason, internal temp, Cloudflare Global Statuspage, and all 4 OOB endpoint probe latencies</strong>.
+                        Flash the updated <code class="mono ai-md-code">esp32-monitor</code> firmware to unlock live <strong>Wi-Fi RSSI, SRAM heap, uptime, reset reason, internal temp, Cloudflare Global Statuspage, and all 4 OOB endpoint probe latencies</strong>.
                     </div>
                 `;
             }
@@ -1712,17 +2286,17 @@
                 const cfIndCls = oob.cf_global_indicator === 'none' ? 'tag-green' : 'tag-red';
                 const epRows = (oob.endpoints || []).map(ep => {
                     const epTag = ep.state === 'UP'
-                        ? '<span class="tag tag-green" style="margin-left:0">UP</span>'
-                        : (ep.state === 'SLOW' ? '<span class="tag tag-amber" style="margin-left:0">SLOW</span>' : '<span class="tag tag-red" style="margin-left:0">' + escapeHtml(ep.state) + '</span>');
+                        ? '<span class="tag tag-green tag-inline">UP</span>'
+                        : (ep.state === 'SLOW' ? '<span class="tag tag-amber tag-inline">SLOW</span>' : '<span class="tag tag-red tag-inline">' + escapeHtml(ep.state) + '</span>');
                     return `
                         <tr>
                             <td><strong>${escapeHtml(ep.name)}</strong></td>
-                            <td class="mono" style="color:#94a3b8">${escapeHtml(ep.url)}</td>
+                            <td class="mono muted-text">${escapeHtml(ep.url)}</td>
                             <td>${epTag}</td>
                             <td class="mono">${ep.http_code ?? '--'}</td>
                             <td><strong>${ep.latency_ms ?? 0} ms</strong></td>
                             <td>${ep.consecutive_passes ?? 0} ok / ${ep.consecutive_fails ?? 0} fail</td>
-                            <td style="color:#94a3b8">${escapeHtml(ep.last_error || '--')}</td>
+                            <td class="muted-text">${escapeHtml(ep.last_error || '--')}</td>
                         </tr>
                     `;
                 }).join('');
@@ -1745,16 +2319,16 @@
                                     <th>Last Error</th>
                                 </tr>
                             </thead>
-                            <tbody>${epRows || '<tr><td colspan="7" style="color:#94a3b8">No OOB probes reported yet.</td></tr>'}</tbody>
+                            <tbody>${epRows || '<tr><td colspan="7" class="muted-text">No OOB probes reported yet.</td></tr>'}</tbody>
                         </table>
                     </div>
                 `;
             }
 
             container.innerHTML = `
-                <div class="domain-section" style="border-color:${borderCol};">
+                <div class="domain-section${isOnline ? '' : ' domain-section-crit'}">
                     <div class="domain-title">
-                        <span>📡 NodeMCU ESP-32S Watchdog (${escapeHtml(p.target_ip || d?.wifi_ip || '--')})</span>
+                        <span>📡 NodeMCU ESP&#8209;32S Watchdog (${escapeHtml(p.target_ip || d?.wifi_ip || '--')})</span>
                         <span class="subtitle-badge">MAC: ${escapeHtml(p.mac || d?.wifi_mac || '--')} (${escapeHtml(p.vendor || 'Espressif Inc.')}) • Updated: ${escapeHtml(formatSyncTimestamp(esp32.last_updated_utc))}</span>
                     </div>
                     <div class="grid">
@@ -1772,7 +2346,7 @@
                             <h3>Packet Loss</h3>
                             <div class="metric ${getThresholdClass(p.packet_loss_pct, 20, 60)}">${p.packet_loss_pct ?? 0}%</div>
                             <div class="metric-sub">${p.packets_received ?? 0} / ${p.packets_sent ?? 5} packets received • Probed from <span class="mono">${escapeHtml(p.probed_from || 'rpi')}</span></div>
-                            <div class="progress-track"><div class="progress-bar ${getProgressClass(p.packet_loss_pct ?? 0)}" style="width:${clampPct(p.packet_loss_pct)}%"></div></div>
+                            <div class="progress-track"><div class="progress-bar ${getThresholdProgressClass(p.packet_loss_pct ?? 0, 20, 60)}" style="width:${clampPct(p.packet_loss_pct)}%"></div></div>
                         </div>
                         <div class="card">
                             <h3>24h Availability &amp; Trend</h3>
@@ -1798,26 +2372,26 @@
             let anomaliesHtml = '';
             if (aiAnomalies.length > 0) {
                 const bulkBtnHtml = aiAnomalies.length > 1
-                    ? `<div style="display:flex; justify-content:flex-end; gap:0.35rem; margin-bottom:0.2rem;">
+                    ? `<div class="anomalies-bulk-row">
                         <button class="snooze-btn" onclick="snoozeAssessment('all', '24h')">💤 Snooze All (24h)</button>
                         <button class="snooze-btn" onclick="snoozeAssessment('all', '72h')">All (72h)</button>
                         <button class="snooze-btn" onclick="snoozeAssessment('all', '7d')">All (7d)</button>
                        </div>`
                     : '';
 
-                anomaliesHtml = '<div style="margin-top:0.85rem; display:flex; flex-direction:column; gap:0.45rem;">' +
+                anomaliesHtml = '<div class="anomalies-list">' +
                     bulkBtnHtml +
                     aiAnomalies.map(a => {
                         const tagCls = a.severity === 'CRITICAL' ? 'tag-red' : 'tag-amber';
-                        return `<div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.5rem; background:#0b1329; padding:0.45rem 0.65rem; border-radius:6px; border:1px solid #1e293b;">
-                            <div>
-                                <span class="tag ${tagCls}" style="margin-left:0">${escapeHtml(a.severity)}</span>
-                                <span class="tag">${escapeHtml(a.category || 'NOC')}</span>
+                        return `<div class="anomaly-row">
+                            <div class="anomaly-main">
+                                <span class="tag ${tagCls} tag-inline">${escapeHtml(a.severity)}</span>
+                                <span class="tag tag-inline">${escapeHtml(a.category || 'NOC')}</span>
                                 <strong>${escapeHtml(a.title)}</strong>
-                                <span style="color:#94a3b8">— ${escapeHtml(a.detail)}</span>
+                                <span class="muted-text">— ${escapeHtml(a.detail)}</span>
                             </div>
-                            <div style="display:flex; gap:0.25rem; align-items:center;">
-                                <span style="font-size:0.75rem; color:#64748b; margin-right:0.2rem;">Snooze:</span>
+                            <div class="anomaly-controls">
+                                <span class="snooze-label">Snooze:</span>
                                 <button class="snooze-btn" onclick="snoozeAssessment('${escapeHtml(a.key)}', '24h')" title="Snooze for 24 hours">24h</button>
                                 <button class="snooze-btn" onclick="snoozeAssessment('${escapeHtml(a.key)}', '72h')" title="Snooze for 72 hours">72h</button>
                                 <button class="snooze-btn" onclick="snoozeAssessment('${escapeHtml(a.key)}', '7d')" title="Snooze for 7 days">7d</button>
@@ -1829,19 +2403,19 @@
 
             let snoozedHtml = '';
             if (aiSnoozed.length > 0) {
-                snoozedHtml = '<div style="margin-top:0.85rem; background:#0b1329; border:1px dashed #334155; border-radius:6px; padding:0.6rem 0.75rem;">' +
-                    `<div style="font-size:0.8rem; font-weight:600; color:#94a3b8; margin-bottom:0.45rem; display:flex; justify-content:space-between; align-items:center;">` +
+                snoozedHtml = '<div class="snoozed-box">' +
+                    `<div class="snoozed-box-header">` +
                     `<span>💤 Snoozed Assessments (${aiSnoozed.length}) — Muted in AI &amp; Telegram Alerts</span>` +
-                    `<button class="unsnooze-btn" onclick="unsnoozeAssessment('all')" style="font-size:0.7rem; padding:0.1rem 0.4rem;">Unsnooze All</button>` +
+                    `<button class="unsnooze-btn unsnooze-btn-sm" onclick="unsnoozeAssessment('all')">Unsnooze All</button>` +
                     `</div>` +
-                    '<div style="display:flex; flex-direction:column; gap:0.35rem;">' +
+                    '<div class="snoozed-list">' +
                     aiSnoozed.map(s => `
-                        <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:0.4rem; font-size:0.85rem;">
+                        <div class="snoozed-item">
                             <div>
-                                <span class="tag" style="background:#1e293b; color:#38bdf8; border:1px solid #0284c7; margin-left:0;">💤 ${escapeHtml(s.duration_str || '24h')}</span>
+                                <span class="tag tag-snooze">💤 ${escapeHtml(s.duration_str || '24h')}</span>
                                 <strong>${escapeHtml(s.title)}</strong>
-                                <span style="color:#64748b;">— ${escapeHtml(s.detail || '')}</span>
-                                <span style="color:#94a3b8; font-size:0.75rem;">(${escapeHtml(s.remaining_human || '')} left • expires ${escapeHtml(s.snoozed_until_utc || '')})</span>
+                                <span class="muted-text">— ${escapeHtml(s.detail || '')}</span>
+                                <span class="snoozed-expiry">(${escapeHtml(s.remaining_human || '')} left • expires ${escapeHtml(s.snoozed_until_utc || '')})</span>
                             </div>
                             <button class="unsnooze-btn" onclick="unsnoozeAssessment('${escapeHtml(s.key)}')" title="Reactivate this assessment">Unsnooze</button>
                         </div>
@@ -1857,12 +2431,12 @@
                 : aiStatus;
 
             aiContainer.innerHTML = `
-                <div id="ai-analyst-section" class="domain-section ai-analyst-collapsible" style="border-color:#38bdf8;">
+                <div id="ai-analyst-section" class="domain-section ai-analyst-collapsible">
                     <button type="button" id="ai-analyst-toggle" class="ai-analyst-toggle-header" onclick="toggleAiAnalyst()" aria-expanded="${aiAnalystExpanded}" aria-controls="ai-analyst-body">
                         <span class="ai-analyst-title-group">
                             <span class="ai-analyst-title-text">🤖 Workers AI Autonomous NOC Analyst</span>
-                            <span class="tag ${aiStatusTagCls}" style="margin-left:0;">${escapeHtml(statusSummaryLabel)}</span>
-                            ${aiSnoozed.length ? `<span class="tag" style="margin-left:0;">💤 ${aiSnoozed.length} snoozed</span>` : ''}
+                            <span class="tag ${aiStatusTagCls} tag-inline">${escapeHtml(statusSummaryLabel)}</span>
+                            ${aiSnoozed.length ? `<span class="tag tag-inline">💤 ${aiSnoozed.length} snoozed</span>` : ''}
                         </span>
                         <span class="ai-analyst-header-right">
                             <span class="subtitle-badge ai-analyst-meta-badge">${escapeHtml(aiData.model || '@cf/google/gemma-4-26b-a4b-it')} | Last Check: ${escapeHtml(aiData.last_analyzed_utc || '--')} (${aiData.inference_duration_sec ?? 0}s)</span>
@@ -1870,7 +2444,7 @@
                         </span>
                     </button>
                     <div id="ai-analyst-body" class="ai-analyst-body ${aiAnalystExpanded ? '' : 'folded'}">
-                        <div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));">
+                        <div class="grid ai-kpi-grid">
                             <div class="card">
                                 <h3>AI Monitor Verdict</h3>
                                 <div class="metric ${aiStatusClass}">${escapeHtml(aiStatus)}</div>
@@ -1878,12 +2452,12 @@
                             </div>
                             <div class="card">
                                 <h3>Inference &amp; Policy Engine</h3>
-                                <div class="metric" style="font-size:1.1rem; color:#38bdf8;">Cloudflare Workers AI</div>
+                                <div class="metric metric-compact">Cloudflare Workers AI</div>
                                 <div class="metric-sub">Strict 5xx Rule: ≥100/hr × 2h • D1/DO Read Cap: 50B/mo • Telegram Alerts Enabled</div>
                             </div>
                             <div class="card">
                                 <h3>Schedule &amp; Edge Fleet</h3>
-                                <div class="metric" style="font-size:1.1rem; color:#c084fc;">Every 15m (CF + RPi5 Cron)</div>
+                                <div class="metric metric-compact">Every 15m (CF + RPi5 Cron)</div>
                                 <div class="metric-sub">Singleton Durable Object (SQLite) • Cloudflare + RPi5 + ESP-32S Watchdog</div>
                             </div>
                         </div>
@@ -1895,16 +2469,16 @@
                             <button type="button" id="noc-assessment-toggle" class="assessment-toggle-header" onclick="toggleNocAssessment()" aria-expanded="${assessmentExpanded}" aria-controls="noc-assessment-body">
                                 <span class="assessment-toggle-title">
                                     <span>🧠 Autonomous NOC Assessment</span>
-                                    <span class="tag ${aiStatusTagCls}" style="margin-left:0;">${escapeHtml(aiStatus)}</span>
-                                    <span style="font-weight:400; text-transform:none; letter-spacing:0; color:#94a3b8; font-size:0.78rem;">Click to view AI briefing &amp; Ask AI Analyst</span>
+                                    <span class="tag ${aiStatusTagCls} tag-inline">${escapeHtml(aiStatus)}</span>
+                                    <span class="assessment-hint">Click to view AI briefing &amp; Ask AI Analyst</span>
                                 </span>
                                 <span id="noc-assessment-chevron" class="assessment-chevron">${assessmentExpanded ? '▾ Collapse' : '▸ Expand'}</span>
                             </button>
                             <div id="noc-assessment-body" class="assessment-body ${assessmentExpanded ? '' : 'folded'}">
-                                <div style="white-space:pre-wrap; font-size:0.9rem; line-height:1.55; color:#e2e8f0;">${formatAiMarkdown(aiData.analysis || 'Waiting for next Workers AI evaluation cycle...')}</div>
+                                <div class="assessment-prose">${formatAiMarkdown(aiData.analysis || 'Waiting for next Workers AI evaluation cycle...')}</div>
                                 <form class="ask-bar" onsubmit="askAiAnalyst(event)">
                                     <input id="ask-noc-input" class="ask-input" type="text" placeholder="Ask AI Analyst about Cloudflare zones, 5xx errors, quotas, Raspberry Pi 5, Qdrant, Brain sync, or ESP-32S..." value="${escapeHtml(existingQuestionVal)}" />
-                                    <button id="btn-ask-ai" type="submit" class="action-btn">💬 Ask AI Analyst</button>
+                                    <button id="btn-ask-ai" type="submit" class="action-btn action-btn-primary">💬 Ask AI Analyst</button>
                                 </form>
                                 <div id="ask-ai-reply-box">${lastAskReplyHtml}</div>
                             </div>
@@ -1994,7 +2568,7 @@
 
             if (btn) { btn.disabled = true; btn.innerText = '⏳ Thinking...'; }
             if (replyBox) {
-                replyBox.innerHTML = `<div style="margin-top:0.75rem; padding:0.65rem 0.85rem; background:#0b1329; border:1px solid #1e3a5f; border-radius:6px; color:#94a3b8; font-size:0.86rem;">⏳ Workers AI is analyzing live Cloudflare, RPi5 &amp; ESP-32S telemetry...</div>`;
+                replyBox.innerHTML = `<div class="ask-loading-box">⏳ Workers AI is analyzing live Cloudflare, RPi5 &amp; ESP-32S telemetry...</div>`;
             }
 
             try {
@@ -2006,19 +2580,19 @@
                 const data = await resp.json().catch(() => ({}));
                 if (resp.ok && data.ok) {
                     lastAskReplyHtml = `
-                        <div style="margin-top:0.75rem; padding:0.75rem 0.9rem; background:#0b1329; border:1px solid #0284c7; border-radius:6px; font-size:0.88rem; line-height:1.5;">
-                            <div style="font-size:0.76rem; color:#38bdf8; margin-bottom:0.35rem; display:flex; justify-content:space-between;">
+                        <div class="ask-reply-box">
+                            <div class="ask-reply-meta">
                                 <span><strong>Q:</strong> ${escapeHtml(question)}</span>
                                 <span>${escapeHtml(data.model || 'Workers AI')} (${data.elapsed_sec ?? 0}s)</span>
                             </div>
-                            <div style="white-space:pre-wrap; color:#f8fafc;">${formatAiMarkdown(data.answer || '')}</div>
+                            <div class="ask-reply-body">${formatAiMarkdown(data.answer || '')}</div>
                         </div>
                     `;
                 } else {
-                    lastAskReplyHtml = `<div style="margin-top:0.75rem; color:#f87171; font-size:0.85rem;">Error: ${escapeHtml(data.error || resp.statusText)}</div>`;
+                    lastAskReplyHtml = `<div class="ask-error-box">Error: ${escapeHtml(data.error || resp.statusText)}</div>`;
                 }
             } catch (e) {
-                lastAskReplyHtml = `<div style="margin-top:0.75rem; color:#f87171; font-size:0.85rem;">Error: ${escapeHtml(e.message)}</div>`;
+                lastAskReplyHtml = `<div class="ask-error-box">Error: ${escapeHtml(e.message)}</div>`;
             } finally {
                 if (replyBox) replyBox.innerHTML = lastAskReplyHtml;
                 if (btn) { btn.disabled = false; btn.innerText = '💬 Ask AI Analyst'; }
